@@ -4,7 +4,18 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>منصة خدمة فتيان إعدادي</title>
-  <!-- خط كايرو الفخم -->
+  
+  <!-- إعدادات تطبيق الموبايل (PWA) -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1e1b4b">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="خدمة فتيان">
+  <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1JQ3i6thxjKaDacK8-deyUxloTZYIJefQ">
+  <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1JQ3i6thxjKaDacK8-deyUxloTZYIJefQ">
+
+  <!-- خط كايرو -->
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&display=swap" rel="stylesheet">
   <!-- ستايل التطبيق للموبايل -->
   <link rel="stylesheet" href="style.css">
@@ -12,8 +23,103 @@
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <!-- محرك الـ API -->
   <script src="api.js"></script>
+
+  <style>
+    /* شاشة البداية الاحترافية (Splash Screen) */
+    #splashScreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, #111827 0%, #1e1b4b 100%);
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      transition: opacity 0.6s ease, visibility 0.6s ease;
+      color: #ffffff;
+      text-align: center;
+    }
+
+    .splash-logo {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      border: 3px solid #fbbf24;
+      padding: 6px;
+      background: white;
+      box-shadow: 0 10px 30px rgba(217, 119, 6, 0.4);
+      animation: pulseLogo 1.8s infinite alternate ease-in-out;
+      margin-bottom: 20px;
+    }
+
+    @keyframes pulseLogo {
+      0% { transform: scale(0.95); box-shadow: 0 8px 20px rgba(217, 119, 6, 0.3); }
+      100% { transform: scale(1.04); box-shadow: 0 15px 35px rgba(251, 191, 36, 0.6); }
+    }
+
+    .splash-title {
+      font-size: 22px;
+      font-weight: 900;
+      color: #ffffff;
+      margin: 0 0 6px 0;
+    }
+
+    .splash-subtitle {
+      font-size: 15px;
+      color: #fbbf24;
+      margin: 0 0 25px 0;
+      font-weight: 800;
+    }
+
+    .splash-loader {
+      width: 32px;
+      height: 32px;
+      border: 3px solid rgba(251, 191, 36, 0.2);
+      border-top-color: #fbbf24;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* زر تثبيت التطبيق البارز */
+    #installAppBanner {
+      display: none;
+      background: linear-gradient(135deg, #d97706, #b45309);
+      color: white;
+      padding: 12px 16px;
+      border-radius: 16px;
+      margin-bottom: 18px;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 15px rgba(217, 119, 6, 0.25);
+    }
+    .btn-install-now {
+      background: white;
+      color: #92400e;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-weight: 900;
+      font-size: 14px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
+
+  <!-- شاشة البداية والافتتاحية (Splash Screen) -->
+  <div id="splashScreen">
+    <img src="https://lh3.googleusercontent.com/d/1JQ3i6thxjKaDacK8-deyUxloTZYIJefQ" alt="شعار الخدمة" class="splash-logo">
+    <h1 class="splash-title">منصة خدمة فتيان إعدادي</h1>
+    <p class="splash-subtitle">كنيسة العذراء مريم بطما</p>
+    <div class="splash-loader"></div>
+  </div>
 
   <!-- شريط التطبيق العلوي الثابت -->
   <header class="mobile-app-header">
@@ -31,6 +137,15 @@
 
   <!-- محتوى التطبيق -->
   <main class="mobile-container">
+
+    <!-- شريط تثبيت التطبيق (يظهر تلقائياً عندما يدعم المتصفح التثبيت) -->
+    <div id="installAppBanner">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 20px;">📲</span>
+        <span style="font-size: 13px; font-weight: 900;">تثبيت التطبيق على جهازك</span>
+      </div>
+      <button class="btn-install-now" onclick="triggerInstallApp()">تثبيت الآن</button>
+    </div>
 
     <!-- الشاشة الرئيسية: شبكة كروت الخدمات الفخمة -->
     <div id="pageHome" class="page-view active">
@@ -106,7 +221,7 @@
 
   </main>
 
-  <!-- شريط التنقل السفلي السريع لتجربة التطبيق الحقيقية -->
+  <!-- شريط التنقل السفلي السريع -->
   <nav class="mobile-bottom-nav">
     <div class="nav-item active" id="navHome" onclick="goToHome()">
       <span class="nav-icon">🏠</span>
@@ -131,6 +246,43 @@
   </nav>
 
   <script>
+    // إخفاء شاشة البداية بنعومة بعد ثانية ونصف
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const splash = document.getElementById('splashScreen');
+        if (splash) {
+          splash.style.opacity = '0';
+          setTimeout(() => { splash.style.display = 'none'; }, 600);
+        }
+      }, 1200);
+    });
+
+    // تسجيل الـ Service Worker لتفعيل التثبيت (PWA)
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+
+    // إدارة نافذة التثبيت الرسمية
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const banner = document.getElementById('installAppBanner');
+      if (banner) banner.style.display = 'flex';
+    });
+
+    function triggerInstallApp() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(() => {
+          deferredPrompt = null;
+          document.getElementById('installAppBanner').style.display = 'none';
+        });
+      }
+    }
+
     const serviceTitles = {
       'Search': '🔍 قاعدة البيانات',
       'Attendance': '📋 تسجيل الحضور والغياب',
@@ -154,7 +306,6 @@
       container.style.display = 'block';
       container.innerHTML = '<div class="global-loader"><span></span><span></span><span></span></div>';
 
-      // تحديث شريط الرأس وزر الرجوع
       document.getElementById('appHeaderTitle').innerText = serviceTitles[pageName] || 'خدمة فتيان إعدادي';
       document.getElementById('btnHeaderBack').style.display = 'flex';
 
@@ -164,7 +315,6 @@
         const htmlContent = await response.text();
         container.innerHTML = htmlContent;
 
-        // تشغيل السكربتات المدمجة
         const scripts = container.querySelectorAll("script");
         scripts.forEach(oldScript => {
           const newScript = document.createElement("script");
@@ -187,7 +337,6 @@
       container.innerHTML = '';
       document.getElementById('pageHome').style.display = 'block';
 
-      // إعادة عنوان الرأس وإخفاء زر الرجوع
       document.getElementById('appHeaderTitle').innerText = 'خدمة فتيان إعدادي';
       document.getElementById('btnHeaderBack').style.display = 'none';
       window.scrollTo({ top: 0, behavior: 'smooth' });

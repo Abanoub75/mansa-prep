@@ -1,0 +1,24 @@
+{
+  "name": "منصة خدمة فتيان إعدادي - بطما",
+  "short_name": "خدمة فتيان",
+  "description": "تطبيق متابعة وتسجيل خدمة فتيان إعدادي بكنيسة العذراء مريم بطما",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#1e1b4b",
+  "theme_color": "#1e1b4b",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://lh3.googleusercontent.com/d/1JQ3i6thxjKaDacK8-deyUxloTZYIJefQ",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://lh3.googleusercontent.com/d/1JQ3i6thxjKaDacK8-deyUxloTZYIJefQ",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
