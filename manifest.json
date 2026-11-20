@@ -12,13 +12,13 @@
       "src": "https://lh3.googleusercontent.com/d/1JQ3i6thxjKaDacK8-deyUxloTZYIJefQ",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "https://lh3.googleusercontent.com/d/1JQ3i6thxjKaDacK8-deyUxloTZYIJefQ",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "maskable"
     }
   ]
 }
