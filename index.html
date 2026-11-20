@@ -4,153 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>منصة خدمة فتيان إعدادي - كنيسة العذراء مريم بطما</title>
+  <!-- خط كايرو الفخم -->
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <!-- ملف التنسيقات الفخم الشامل -->
+  <link rel="stylesheet" href="style.css">
   <!-- مكتبة مسح QR Code -->
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <!-- محرك الـ API المشترك -->
   <script src="api.js"></script>
-
-  <style>
-    :root {
-      --primary-dark: #111827;
-      --navy-blue: #1e1b4b;
-      --gold: #d97706;
-      --gold-light: #f59e0b;
-      --gold-border: #c5a059;
-      --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-      --card-bg: #ffffff;
-      --text-main: #1f2937;
-    }
-
-    * { box-sizing: border-box; font-family: 'Cairo', sans-serif; transition: all 0.25s ease; font-weight: 800; }
-
-    body {
-      background: var(--bg-gradient);
-      color: var(--text-main);
-      margin: 0;
-      padding: 16px 8px;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      justify-content: flex-start;
-      align-items: center;
-    }
-
-    .content-container {
-      width: 100%;
-      max-width: 580px;
-      margin: 0 auto;
-    }
-
-    .home-hero {
-      text-align: center;
-      padding: 40px 24px;
-      background: var(--card-bg);
-      border-radius: 28px;
-      box-shadow: 0 15px 35px rgba(30, 27, 75, 0.1);
-      border: 3px solid #fbbf24;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .home-hero::before {
-      content: '';
-      position: absolute;
-      top: 0; right: 0; left: 0;
-      height: 8px;
-      background: linear-gradient(90deg, #d97706, #fbbf24, #d97706);
-    }
-
-    .home-verse {
-      font-size: 16px;
-      font-weight: 900;
-      color: var(--navy-blue);
-      margin: 6px 0;
-    }
-
-    .home-title {
-      font-size: 22px;
-      font-weight: 900;
-      color: var(--navy-blue);
-      margin: 8px 0 4px 0;
-    }
-
-    .home-subtitle {
-      font-size: 15px;
-      color: var(--gold);
-      font-weight: 900;
-      margin-bottom: 25px;
-    }
-
-    .home-logo {
-      width: 150px;
-      height: 150px;
-      object-fit: contain;
-      border-radius: 50%;
-      padding: 6px;
-      background: #fff;
-      border: 3px solid #fbbf24;
-      box-shadow: 0 10px 25px rgba(217, 119, 6, 0.25);
-      margin-bottom: 25px;
-    }
-
-    .services-dropdown-box {
-      background: #f8fafc;
-      border: 2.5px solid #cbd5e1;
-      border-radius: 18px;
-      padding: 20px;
-      text-align: right;
-    }
-
-    .services-dropdown-box label {
-      display: block;
-      font-weight: 900;
-      color: var(--navy-blue);
-      font-size: 16px;
-      margin-bottom: 12px;
-    }
-
-    .services-dropdown-box select {
-      width: 100%;
-      padding: 16px 18px;
-      border: 2px solid #94a3b8;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: 900;
-      background-color: #ffffff;
-      color: var(--navy-blue);
-      outline: none;
-      cursor: pointer;
-    }
-
-    .page-section { display: none; width: 100%; }
-    .page-section.active { display: block; }
-
-    .global-loader {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 8px;
-      padding: 25px;
-    }
-
-    .global-loader span {
-      width: 14px;
-      height: 14px;
-      background-color: var(--gold);
-      border-radius: 50%;
-      display: inline-block;
-      animation: bouncePulse 1.4s infinite ease-in-out both;
-    }
-    .global-loader span:nth-child(1) { animation-delay: -0.32s; background-color: var(--navy-blue); }
-    .global-loader span:nth-child(2) { animation-delay: -0.16s; background-color: var(--gold); }
-    .global-loader span:nth-child(3) { background-color: var(--navy-blue); }
-
-    @keyframes bouncePulse {
-      0%, 80%, 100% { transform: scale(0); }
-      40% { transform: scale(1.0); }
-    }
-  </style>
 </head>
 <body>
 
@@ -159,16 +20,16 @@
     <!-- الصفحة الرئيسية -->
     <div id="pageHome" class="page-section active">
       <div class="home-hero">
-        <p class="home-verse">مَنْ أَرَادَ أَنْ يَكُونَ أَوَّلاً فَلْيَكُنْ خَادِماً لِلْجَمِيعِ</p>
-        <h1 class="home-title">منصة خدمة فتيان إعدادي</h1>
-        <p class="home-subtitle">كنيسة العذراء مريم بطما</p>
+        <p style="font-size: 16px; font-weight: 900; color: #1b1b40; margin: 6px 0;">مَنْ أَرَادَ أَنْ يَكُونَ أَوَّلاً فَلْيَكُنْ خَادِماً لِلْجَمِيعِ</p>
+        <h1 style="font-size: 22px; font-weight: 900; color: #1b1b40; margin: 8px 0 4px 0;">منصة خدمة فتيان إعدادي</h1>
+        <p style="font-size: 15px; color: #d97706; font-weight: 900; margin-bottom: 25px;">كنيسة العذراء مريم بطما</p>
         
         <div>
-          <img src="https://lh3.googleusercontent.com/d/1JQ3i6thxjKaDacK8-deyUxloTZYIJefQ" alt="لوجو الخدمة" class="home-logo">
+          <img src="https://lh3.googleusercontent.com/d/1JQ3i6thxjKaDacK8-deyUxloTZYIJefQ" alt="لوجو الخدمة" style="width: 150px; height: 150px; object-fit: contain; border-radius: 50%; padding: 6px; background: #fff; border: 3px solid #fbbf24; box-shadow: 0 10px 25px rgba(217, 119, 6, 0.25); margin-bottom: 25px;">
         </div>
 
-        <div class="services-dropdown-box">
-          <label>📂 اختر الخدمة المطلوبة للانتقال:</label>
+        <div style="background: #f8fafc; border: 2.5px solid #cbd5e1; border-radius: 18px; padding: 20px; text-align: right;">
+          <label style="display: block; font-weight: 900; color: #1b1b40; font-size: 16px; margin-bottom: 12px;">📂 اختر الخدمة المطلوبة للانتقال:</label>
           <select id="mainServiceSelect" onchange="navigateToService(this.value)">
             <option value="">-- اضغط هنا لاختيار القسم --</option>
             <option value="Search">1. بحث وتعديل اسماء قاعدة البيانات</option>
@@ -197,15 +58,15 @@
 
     async function loadSubPage(pageName) {
       const homeSection = document.getElementById('pageHome');
-      if (homeSection) homeSection.classList.remove('active');
+      if (homeSection) homeSection.style.display = 'none';
       
       const container = document.getElementById('dynamicPageContainer');
-      container.classList.add('active');
+      container.style.display = 'block';
       container.innerHTML = '<div class="global-loader"><span></span><span></span><span></span></div>';
 
       try {
         const response = await fetch(pageName + '.html');
-        if (!response.ok) throw new Error("تعذر تحميل الملف " + pageName + ".html");
+        if (!response.ok) throw new Error("تعذر تحميل ملف " + pageName + ".html");
         const htmlContent = await response.text();
         container.innerHTML = htmlContent;
 
@@ -227,16 +88,36 @@
     function goToHome() {
       playClickSound();
       const container = document.getElementById('dynamicPageContainer');
-      container.classList.remove('active');
+      container.style.display = 'none';
       container.innerHTML = '';
       
       const homeSection = document.getElementById('pageHome');
-      if (homeSection) homeSection.classList.add('active');
+      if (homeSection) homeSection.style.display = 'block';
       
       const mainSelect = document.getElementById('mainServiceSelect');
       if (mainSelect) mainSelect.value = "";
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   </script>
+
+  <style>
+    .home-hero {
+      text-align: center;
+      padding: 40px 24px;
+      background: #ffffff;
+      border-radius: 28px;
+      box-shadow: 0 15px 35px rgba(30, 27, 75, 0.1);
+      border: 3px solid #fbbf24;
+      position: relative;
+      overflow: hidden;
+    }
+    .home-hero::before {
+      content: '';
+      position: absolute;
+      top: 0; right: 0; left: 0;
+      height: 8px;
+      background: linear-gradient(90deg, #d97706, #fbbf24, #d97706);
+    }
+  </style>
 </body>
 </html>
