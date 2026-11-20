@@ -1,0 +1,180 @@
+<div class="page-card animate-fade">
+  <div class="page-top-bar">
+    <button type="button" class="btn-home-icon" onclick="goToHome()" title="الرجوع للرئيسية">
+      🏠 الرئيسية
+    </button>
+    <h2 class="page-title-text">📷 مسح كود QR لتسجيل الحضور</h2>
+  </div>
+
+  <div class="gold-divider"></div>
+
+  <div class="form-group">
+    <label for="qrAttendanceSheetSelect">📂 اختر كشف الحضور (الصف):</label>
+    <select id="qrAttendanceSheetSelect"><option value="">-- جاري تحميل الكشوفات --</option></select>
+  </div>
+
+  <div class="form-group">
+    <label for="qrMeetingDateSelect">📅 اختر تاريخ الاجتماع:</label>
+    <select id="qrMeetingDateSelect" disabled><option value="">-- اختر الكشف أولاً --</option></select>
+  </div>
+
+  <input id="qrImageInput" type="file" accept="image/*" capture="environment" style="display:none;">
+  <button id="scanButton" class="btn-action" style="background: linear-gradient(135deg,#d97706,#b45309); color: white;" type="button" disabled>
+    📷 تصوير كارت الحضور وقراءة QR
+  </button>
+  
+  <p style="font-size: 13px; line-height: 1.8; color: #475569; margin-top: 12px;">
+    اضغط الزر لفتح كاميرا الهاتف الخلفية وتصوير الكارت. بعد التقاط الصورة ستتم قراءة كود QR تلقائياً وتسجيل الحضور فوراً في الشيت.
+  </p>
+  
+  <img id="scanPreview" alt="صورة كارت الحضور" style="width: 100%; max-height: 300px; object-fit: contain; margin-top: 15px; display: none; border-radius: 12px;">
+  <div id="resultAlert" style="display:none; padding:14px; border-radius:12px; margin-top:16px; text-align:center; font-weight:900;"></div>
+</div>
+
+<div id="qr-file-reader" style="display:none;"></div>
+
+<script>
+let selectedSheetName = '';
+let selectedColIndex = '';
+let qrReader = null;
+let processing = false;
+
+const sheetSelect = document.getElementById('qrAttendanceSheetSelect');
+const dateSelect = document.getElementById('qrMeetingDateSelect');
+const scanButton = document.getElementById('scanButton');
+const imageInput = document.getElementById('qrImageInput');
+const preview = document.getElementById('scanPreview');
+
+function alertUser(message, type) {
+  const box = document.getElementById('resultAlert');
+  box.textContent = message;
+  box.style.display = 'block';
+  if (type === 'success') {
+    box.style.background = '#dcfce7'; box.style.color = '#166534'; box.style.border = '2px solid #22c55e';
+  } else if (type === 'error') {
+    box.style.background = '#fee2e2'; box.style.color = '#991b1b'; box.style.border = '2px solid #ef4444';
+  } else {
+    box.style.background = '#dbeafe'; box.style.color = '#1e40af'; box.style.border = '2px solid #60a5fa';
+  }
+}
+
+async function loadAttendanceSheetsList() {
+  sheetSelect.disabled = true;
+  try {
+    const res = await apiGet('getAttendanceSheets');
+    sheetSelect.innerHTML = '<option value="">-- اختر كشف الصف --</option>';
+    if (res.sheets && res.sheets.length > 0) {
+      res.sheets.forEach(function(name) {
+        sheetSelect.appendChild(new Option(name, name));
+      });
+      sheetSelect.disabled = false;
+    } else {
+      sheetSelect.innerHTML = '<option value="">لا توجد كشوفات</option>';
+    }
+  } catch (err) {
+    sheetSelect.disabled = false;
+    alertUser('تعذر تحميل الكشوفات: ' + err.message, 'error');
+  }
+}
+
+sheetSelect.addEventListener('change', async function() {
+  selectedSheetName = sheetSelect.value;
+  selectedColIndex = '';
+  dateSelect.disabled = true;
+  scanButton.disabled = true;
+  dateSelect.innerHTML = '<option value="">-- جاري تحميل التواريخ --</option>';
+  preview.style.display = 'none';
+  if (!selectedSheetName) {
+    dateSelect.innerHTML = '<option value="">-- اختر الكشف أولاً --</option>';
+    return;
+  }
+  try {
+    const res = await apiGet('getAttendanceData', { sheetName: selectedSheetName });
+    dateSelect.innerHTML = '<option value="">-- اختر تاريخ الاجتماع --</option>';
+    if (res.dates && res.dates.length > 0) {
+      res.dates.forEach(function(item) {
+        dateSelect.appendChild(new Option(item.dateText, item.colIndex));
+      });
+      dateSelect.disabled = false;
+    } else {
+      dateSelect.innerHTML = '<option value="">لا توجد تواريخ مسجلة</option>';
+    }
+  } catch (err) {
+    alertUser('فشل تحميل التواريخ: ' + err.message, 'error');
+  }
+});
+
+dateSelect.addEventListener('change', function() {
+  selectedColIndex = dateSelect.value;
+  scanButton.disabled = !(selectedSheetName && selectedColIndex);
+});
+
+scanButton.addEventListener('click', function() {
+  if (!selectedSheetName || !selectedColIndex) {
+    alertUser('اختر كشف الحضور وتاريخ الاجتماع أولاً.', 'error');
+    return;
+  }
+  imageInput.click();
+});
+
+imageInput.addEventListener('change', async function(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  if (!/^image\//i.test(file.type)) {
+    alertUser('الملف المختار ليس صورة. التقط صورة للكارت أو اختر صورة بصيغة JPG أو PNG.', 'error');
+    imageInput.value = '';
+    return;
+  }
+  if (typeof Html5Qrcode === 'undefined') {
+    alertUser('تعذر تحميل مكتبة قراءة QR. تحقق من اتصال الإنترنت.', 'error');
+    imageInput.value = '';
+    return;
+  }
+  if (processing) return;
+  processing = true;
+  scanButton.disabled = true;
+  alertUser('⏳ جارٍ تحليل الصورة والبحث عن كود QR...', 'info');
+
+  preview.src = URL.createObjectURL(file);
+  preview.style.display = 'block';
+
+  try {
+    if (!qrReader) qrReader = new Html5Qrcode('qr-file-reader', { verbose: false });
+    const decodedText = await qrReader.scanFile(file, false);
+    const studentId = String(decodedText || '').trim();
+    if (!studentId) throw new Error('لم يتم العثور على نص داخل كود QR.');
+    alertUser('تمت قراءة الكود (' + studentId + '). جارٍ تسجيل الحضور...', 'info');
+    await registerStudent(studentId);
+  } catch (err) {
+    alertUser('لم نتمكن من قراءة الكود من الصورة بوضوح. حاول التصوير بإضاءة جيدة.', 'error');
+    processing = false;
+    scanButton.disabled = !(selectedSheetName && selectedColIndex);
+  } finally {
+    imageInput.value = '';
+  }
+});
+
+async function registerStudent(studentId) {
+  try {
+    const response = await apiPost('registerAttendanceByQRWithDate', {
+      sheetName: selectedSheetName,
+      colIndex: Number(selectedColIndex),
+      studentId: studentId
+    });
+
+    if (response && response.success) {
+      alertUser('✅ ' + (response.message || 'تم تسجيل الحضور بنجاح.'), 'success');
+      playClickSound();
+    } else {
+      alertUser('❌ ' + (response && response.message ? response.message : 'لم يتم تسجيل الحضور.'), 'error');
+    }
+  } catch (err) {
+    alertUser('حدث خطأ أثناء تسجيل الحضور: ' + err.message, 'error');
+  } finally {
+    processing = false;
+    scanButton.disabled = !(selectedSheetName && selectedColIndex);
+  }
+}
+
+loadAttendanceSheetsList();
+</script>

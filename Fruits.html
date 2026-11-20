@@ -1,0 +1,79 @@
+<div class="page-card animate-fade">
+  <div class="page-top-bar">
+    <button type="button" class="btn-home-icon" onclick="goToHome()" title="الرجوع للرئيسية">
+      🏠 الرئيسية
+    </button>
+    <h2 class="page-title-text">📸 ثمار العام والأنشطة والرحلات</h2>
+  </div>
+
+  <div class="gold-divider"></div>
+
+  <div class="full-page-container">
+    <div id="fruitsListContainer" style="display: flex; flex-direction: column; gap: 16px;">
+      <div style="text-align: center; padding: 30px; font-weight: 900; color: #4b5563;">
+        جاري تحميل الصور والأنشطة...
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+async function loadFruitsData() {
+  const container = document.getElementById('fruitsListContainer');
+  container.innerHTML = '<div style="text-align: center; padding: 30px; font-weight: 900; color: #4b5563;"><div class="global-loader"><span></span><span></span><span></span></div>جاري تحميل الصور والأنشطة...</div>';
+
+  try {
+    const res = await apiGet('getFruitsData');
+    container.innerHTML = '';
+    
+    if (res.error) {
+      container.innerHTML = '<div style="text-align:center; padding:20px; color:#b91c1c; font-weight:900;">' + res.error + '</div>';
+      return;
+    }
+
+    if (!res.items || res.items.length === 0) {
+      container.innerHTML = '<div style="text-align:center; padding:20px; font-weight:900; color:#4b5563;">لا توجد صور أو أنشطة مسجلة حالياً</div>';
+      return;
+    }
+
+    res.items.forEach(function(item) {
+      const card = document.createElement('div');
+      card.className = 'fruit-card';
+      
+      card.innerHTML = `
+        ${item.imageUrl ? `
+          <div class="fruit-img-wrapper">
+            <img src="${item.imageUrl}" alt="${item.title}" loading="lazy" onerror="this.parentElement.style.display='none'">
+          </div>
+        ` : ''}
+        <div class="fruit-content">
+          <h3 class="fruit-title">📌 ${item.title}</h3>
+          ${item.description ? `<p class="fruit-desc">${item.description}</p>` : '<p class="fruit-desc" style="color:#9ca3af;">لا يوجد وصف تفصيلي لهذا النشاط.</p>'}
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  } catch(err) {
+    container.innerHTML = '<div style="text-align:center; color:#b91c1c; font-weight:900;">خطأ أثناء جلب البيانات: ' + err.message + '</div>';
+  }
+}
+
+loadFruitsData();
+</script>
+
+<style>
+.fruit-card {
+  background: #ffffff; border-radius: 16px; border: 2px solid #d1d5db;
+  overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  display: flex; flex-direction: column;
+}
+.fruit-img-wrapper {
+  background: #0f172a; width: 100%; display: flex; justify-content: center; align-items: center; padding: 8px;
+}
+.fruit-img-wrapper img {
+  width: 100%; height: auto; max-height: 420px; object-fit: contain; border-radius: 8px; display: block;
+}
+.fruit-content { padding: 16px; text-align: right; background: #ffffff; }
+.fruit-title { font-size: 16px; font-weight: 900; color: #1e1b4b; margin: 0 0 8px 0; }
+.fruit-desc { font-size: 14px; font-weight: 800; color: #4b5563; line-height: 1.6; margin: 0; white-space: pre-line; }
+</style>

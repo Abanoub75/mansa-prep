@@ -1,0 +1,360 @@
+<div class="page-card animate-fade">
+  <div class="page-top-bar">
+    <button type="button" class="btn-home-icon" onclick="goToHome()" title="الرجوع للرئيسية">
+      🏠 الرئيسية
+    </button>
+    <h2 class="page-title-text">🚌 حجز رحلات ومؤتمرات الخدمة</h2>
+  </div>
+
+  <div class="gold-divider"></div>
+
+  <!-- زر عرض قائمة الحاجزين -->
+  <div id="mainReportBtnContainer" style="margin-bottom: 16px;">
+    <button type="button" class="btn-action" style="background-color: #1e1b4b; color: #fde047; border: 2.5px solid #c5a059;" onclick="openTripReportSelection()">
+      📊 عدد الحاجزين الآن (عرض وتعديل البيانات)
+    </button>
+  </div>
+
+  <!-- قسم اختيار الرحلة لعرض حاجيها -->
+  <div id="reportTripSelectSection" style="display: none;" class="search-box-container">
+    <div class="form-group" style="margin-bottom: 12px;">
+      <label>📂 اختر الرحلة لعرض حاجيها:</label>
+      <select id="reportTripSelect" onchange="loadBookingsForSelectedTrip()" onclick="playClickSound()">
+        <option value="">-- اختر الرحلة المطلوبة --</option>
+      </select>
+    </div>
+    <button type="button" class="btn-action btn-secondary-custom" style="padding: 12px; font-size: 15px;" onclick="closeTripReportSelection()">
+      ⬅ إرجاع والرجوع للحجز
+    </button>
+  </div>
+
+  <!-- الخطوة الأولى: اختيار الرحلة للتسجيل -->
+  <div id="tripStep1">
+    <div class="search-box-container">
+      <div class="form-group" style="margin-bottom: 0;">
+        <label>📂 اختر الرحلة المتاحة للتسجيل:</label>
+        <select id="tripSelect" onchange="onTripSelected()" onclick="playClickSound()">
+          <option value="">-- جاري تحميل الرحلات المتاحة --</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- الخطوة الثانية: نموذج بيانات الحجز للرحلة المحددة -->
+  <div id="tripStep2" style="display: none;">
+    <div style="margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
+      <span id="selectedTripTitle" style="font-weight: 900; color: #1e1b4b; font-size: 16px;">حجز رحلة: </span>
+      <button type="button" class="btn-action" style="width: auto; padding: 8px 14px; font-size: 14px; background-color: #4b5563; color: white;" onclick="backToTripStep1()">
+        ⬅ تغيير الرحلة
+      </button>
+    </div>
+
+    <form id="tripForm" onsubmit="submitTripBooking(event)">
+      <div class="form-group">
+        <label>👤 اسم الخادم المسؤول عن الحجز:</label>
+        <input type="text" id="servantNameInput" placeholder="اكتب اسم الخادم الثلاثي..." required>
+      </div>
+
+      <div class="form-group">
+        <label>👤 اسم المخدوم:</label>
+        <input type="text" id="tripName" placeholder="اكتب اسم المخدوم الثلاثي..." required>
+      </div>
+      <div class="form-group">
+        <label>📞 رقم الموبايل:</label>
+        <input type="tel" id="tripPhone" placeholder="010xxxxxxxx" required>
+      </div>
+      <div class="form-group">
+        <label>💵 المبلغ المدفوع:</label>
+        <input type="number" id="tripPaid" placeholder="0" value="0" required>
+      </div>
+      <div class="form-group">
+        <label>⏳ المبلغ المتبقي:</label>
+        <input type="number" id="tripRemaining" placeholder="0" value="0" required>
+      </div>
+      <div class="form-group">
+        <label>🏷️ قيمة اشتراك الرحلة:</label>
+        <input type="number" id="tripSubscription" placeholder="0" value="0" required>
+      </div>
+
+      <div class="btn-grid-custom">
+        <button type="submit" class="btn-action btn-success-custom">💾 تأكيد وتسجيل الحجز</button>
+        <button type="button" class="btn-action btn-secondary-custom" onclick="backToTripStep1()">إلغاء</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- قسم عرض بطاقات الحاجزين للرحلة المختارة وتعديلهم -->
+  <div id="bookingsReportSection" style="display: none; background: #f8fafc; padding: 18px; border-radius: 16px; border: 2.5px solid #c5a059; margin-top: 16px;">
+    <h3 id="reportSectionTitle" style="color: #1e1b4b; text-align: center; margin-bottom: 16px; font-size: 17px; font-weight: 900;">👥 حاجزين رحلة:</h3>
+    <div id="bookingsTableContainer">
+      <p style="text-align: center; color: #64748b; font-weight: 900;">اختر الرحلة لعرض حاجيها...</p>
+    </div>
+    <button type="button" class="btn-action btn-secondary-custom" style="margin-top: 16px; width: 100%;" onclick="backToReportSelection()">⬅ اختيار رحلة أخرى</button>
+  </div>
+
+  <div id="tripStatusMsg" style="text-align: center; margin-top: 15px;"></div>
+</div>
+
+<!-- نافذة تعديل بيانات الحجز المنبثقة (Modal) -->
+<div id="editBookingModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
+  <div style="background:white; padding:22px; border-radius:16px; width:92%; max-width:450px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border: 2.5px solid #c5a059;">
+    <h3 style="margin-top:0; color:#1e1b4b; text-align:center; border-bottom:2px solid #e2e8f0; padding-bottom:12px; font-weight: 900; font-size: 18px;">📋 تعديل بيانات الحجز</h3>
+    
+    <input type="hidden" id="editRowIndex">
+    
+    <div class="form-group" style="margin-bottom:14px;">
+      <label>👤 اسم المخدوم:</label>
+      <input type="text" id="editMemberName">
+    </div>
+    
+    <div class="form-group" style="margin-bottom:14px;">
+      <label>🚌 اسم الرحلة:</label>
+      <input type="text" id="editTripName">
+    </div>
+
+    <div class="form-group" style="margin-bottom:14px;">
+      <label>👤 الخادم الحاجز:</label>
+      <input type="text" id="editServantName">
+    </div>
+
+    <div style="display:flex; gap:12px; margin-bottom:14px;">
+      <div style="flex:1;" class="form-group">
+        <label>💵 المدفوع:</label>
+        <input type="text" id="editPaid">
+      </div>
+      <div style="flex:1;" class="form-group">
+        <label>⏳ الباقي:</label>
+        <input type="text" id="editRemaining">
+      </div>
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:20px;">
+      <button type="button" onclick="closeEditModal()" class="btn-action btn-secondary-custom" style="padding: 12px; font-size: 15px;">إلغاء</button>
+      <button type="button" onclick="submitBookingUpdate()" class="btn-action btn-success-custom" style="padding: 12px; font-size: 15px;">💾 حفظ التعديلات</button>
+    </div>
+  </div>
+</div>
+
+<script>
+window.currentSelectedTrip = "";
+
+async function initTripsList() {
+  try {
+    const res = await apiGet('getTripsSheetsList');
+    const select1 = document.getElementById('tripSelect');
+    const select2 = document.getElementById('reportTripSelect');
+    
+    let optionsHtml = '<option value="">-- اختر الرحلة المطلوبة --</option>';
+    if (res.trips && res.trips.length > 0) {
+      res.trips.forEach(function(t) {
+        optionsHtml += '<option value="' + t + '">' + t + '</option>';
+      });
+    }
+    
+    if (select1) select1.innerHTML = optionsHtml;
+    if (select2) select2.innerHTML = optionsHtml;
+  } catch(e) {}
+}
+
+function onTripSelected() {
+  const tripName = document.getElementById('tripSelect').value;
+  if (!tripName) return;
+
+  playClickSound();
+  window.currentSelectedTrip = tripName;
+
+  document.getElementById('selectedTripTitle').innerText = "حجز رحلة: " + tripName;
+  document.getElementById('servantNameInput').value = '';
+  document.getElementById('tripName').value = '';
+  document.getElementById('tripPhone').value = '';
+  document.getElementById('tripPaid').value = '0';
+  document.getElementById('tripRemaining').value = '0';
+  document.getElementById('tripSubscription').value = '0';
+
+  document.getElementById('tripStep1').style.display = 'none';
+  document.getElementById('tripStep2').style.display = 'block';
+}
+
+function backToTripStep1() {
+  playClickSound();
+  document.getElementById('tripStep2').style.display = 'none';
+  document.getElementById('tripStep1').style.display = 'block';
+  document.getElementById('tripSelect').value = '';
+  clearTripStatus();
+}
+
+function openTripReportSelection() {
+  playClickSound();
+  document.getElementById('mainReportBtnContainer').style.display = 'none';
+  document.getElementById('tripStep1').style.display = 'none';
+  document.getElementById('tripStep2').style.display = 'none';
+  document.getElementById('reportTripSelectSection').style.display = 'block';
+  document.getElementById('bookingsReportSection').style.display = 'none';
+  document.getElementById('reportTripSelect').value = '';
+}
+
+function closeTripReportSelection() {
+  playClickSound();
+  document.getElementById('reportTripSelectSection').style.display = 'none';
+  document.getElementById('mainReportBtnContainer').style.display = 'block';
+  document.getElementById('tripStep1').style.display = 'block';
+}
+
+function backToReportSelection() {
+  playClickSound();
+  document.getElementById('bookingsReportSection').style.display = 'none';
+  document.getElementById('reportTripSelectSection').style.display = 'block';
+}
+
+async function loadBookingsForSelectedTrip() {
+  const tripName = document.getElementById('reportTripSelect').value;
+  if (!tripName) return;
+
+  playClickSound();
+  document.getElementById('reportTripSelectSection').style.display = 'none';
+  const reportSec = document.getElementById('bookingsReportSection');
+  reportSec.style.display = 'block';
+  document.getElementById('reportSectionTitle').innerText = "👥 حاجزين رحلة: " + tripName;
+  
+  const container = document.getElementById('bookingsTableContainer');
+  container.innerHTML = '<div class="global-loader"><span></span><span></span><span></span></div>';
+  
+  try {
+    const res = await apiGet('getTripBookingsData', { tripName: tripName });
+    if (res.error) {
+      container.innerHTML = '<p style="color: red; text-align: center; font-weight: 900; padding: 20px;">' + res.error + '</p>';
+      return;
+    }
+    
+    const rows = Array.isArray(res) ? res : (res.data || []);
+    if (!rows || rows.length <= 1) {
+      container.innerHTML = '<p style="text-align: center; color: #64748b; font-weight: 900; padding: 20px;">لا توجد حجوزات مسجلة لهذه الرحلة حتى الآن.</p>';
+      return;
+    }
+    
+    let html = '<div style="display: flex; flex-direction: column; gap: 12px;">';
+    let foundCount = 0;
+    
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i];
+      const servantName = row[0] || '';
+      const memberName = row[1] || '';
+      const phoneNum = row[2] || '';
+      const paidVal = row[3] || '0';
+      const remainVal = row[4] || '0';
+      const rowTrip = (row[6] || row[1] || "").toString().trim();
+      
+      if (rowTrip === tripName.trim()) {
+        foundCount++;
+        html += '<div style="background: #ffffff; border: 2.5px solid #c5a059; border-radius: 14px; padding: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.04); display: flex; justify-content: space-between; align-items: center;">';
+        html += '<div style="text-align: right; flex: 1;">';
+        html += '<div style="font-size: 16px; font-weight: 900; color: #1e1b4b; margin-bottom: 4px;">👤 ' + memberName + '</div>';
+        html += '<div style="font-size: 13px; font-weight: 900; color: #4b5563; margin-bottom: 2px;">📞 الموبايل: ' + (phoneNum || 'غير متوفر') + '</div>';
+        html += '<div style="font-size: 13px; font-weight: 900; color: #64748b;">1️⃣ الخادم: ' + servantName + ' | المدفوع: ' + paidVal + ' | الباقي: ' + remainVal + '</div>';
+        html += '</div>';
+        html += '<div style="padding-right: 10px;">';
+        html += `<button type="button" onclick="openEditModal(${i + 1}, '${servantName}', '${memberName}', '${phoneNum}', '${paidVal}', '${remainVal}', '${rowTrip}')" style="background: #1e1b4b; color:#c5a059; border: 1.5px solid #c5a059; padding: 10px 16px; border-radius: 10px; cursor:pointer; font-size: 14px; font-weight: 900;">✏️ تعديل</button>`;
+        html += '</div></div>';
+      }
+    }
+    
+    if (foundCount === 0) {
+      container.innerHTML = '<p style="text-align: center; color: #64748b; font-weight: 900; padding: 20px;">لا توجد حجوزات مطابقة لهذه الرحلة في الشيت.</p>';
+    } else {
+      html += '</div>';
+      container.innerHTML = html;
+    }
+  } catch(err) {
+    container.innerHTML = '<p style="color: red; text-align: center; font-weight: 900;">خطأ: ' + err.message + '</p>';
+  }
+}
+
+function openEditModal(rowIndex, servant, member, phone, paid, remaining, trip) {
+  document.getElementById('editRowIndex').value = rowIndex;
+  document.getElementById('editServantName').value = servant;
+  document.getElementById('editMemberName').value = member;
+  document.getElementById('editTripName').value = trip;
+  document.getElementById('editPaid').value = paid;
+  document.getElementById('editRemaining').value = remaining;
+  document.getElementById('editBookingModal').style.display = 'flex';
+}
+
+function closeEditModal() {
+  document.getElementById('editBookingModal').style.display = 'none';
+}
+
+async function submitBookingUpdate() {
+  const rowIndex = document.getElementById('editRowIndex').value;
+  const updatedData = [
+    document.getElementById('editServantName').value,
+    document.getElementById('editMemberName').value,
+    document.getElementById('editPaid').value,
+    document.getElementById('editRemaining').value,
+    document.getElementById('editTripName').value
+  ];
+  const currentTripTab = document.getElementById('reportTripSelect').value;
+
+  try {
+    const res = await apiPost('updateFullTripBooking', {
+      rowIndex: rowIndex,
+      updatedData: updatedData,
+      tripName: currentTripTab
+    });
+    alert(res.message || "✅ تم التعديل بنجاح!");
+    closeEditModal();
+    loadBookingsForSelectedTrip();
+  } catch(err) {
+    alert("❌ خطأ في الحفظ: " + err.message);
+  }
+}
+
+async function submitTripBooking(e) {
+  e.preventDefault();
+  playClickSound();
+
+  const bookingData = {
+    servant: document.getElementById('servantNameInput').value,
+    name: document.getElementById('tripName').value,
+    phone: document.getElementById('tripPhone').value,
+    paid: document.getElementById('tripPaid').value,
+    remaining: document.getElementById('tripRemaining').value,
+    subscription: document.getElementById('tripSubscription').value
+  };
+
+  showTripLoader();
+
+  try {
+    const res = await apiPost('saveTripBooking', {
+      tripName: window.currentSelectedTrip,
+      bookingData: bookingData
+    });
+    showTripStatus(res.message || "✅ تم التسجيل!", "#15803d");
+    setTimeout(function() {
+      backToTripStep1();
+      clearTripStatus();
+    }, 1800);
+  } catch(err) {
+    showTripStatus("❌ خطأ: " + err.message, "#991b1b");
+  }
+}
+
+function showTripLoader() {
+  const statusEl = document.getElementById('tripStatusMsg');
+  if (statusEl) statusEl.innerHTML = '<div class="global-loader"><span></span><span></span><span></span></div>';
+}
+
+function clearTripStatus() {
+  const statusEl = document.getElementById('tripStatusMsg');
+  if (statusEl) statusEl.innerHTML = '';
+}
+
+function showTripStatus(msg, color) {
+  const statusEl = document.getElementById('tripStatusMsg');
+  if (statusEl) {
+    statusEl.innerText = msg;
+    statusEl.style.color = color;
+  }
+}
+
+initTripsList();
+</script>

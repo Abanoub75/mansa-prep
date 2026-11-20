@@ -1,0 +1,94 @@
+<div class="page-card animate-fade">
+  <div class="page-top-bar">
+    <button type="button" class="btn-home-icon" onclick="goToHome()" title="الرجوع للرئيسية">
+      🏠 الرئيسية
+    </button>
+    <h2 class="page-title-text">📊 إحصائيات الخدمة</h2>
+  </div>
+
+  <div class="gold-divider"></div>
+
+  <div class="search-box-container" style="text-align: center;">
+    <h3 style="color: #1e1b4b; margin-top: 0; margin-bottom: 10px; font-size: 18px;">📈 احصائيات الحضور الجماعية %</h3>
+    <p style="font-size: 13px; color: #64748b; margin-bottom: 15px; line-height: 1.5;">
+      استعرض نسب الحضور الإجمالية للاجتماعات السابقة التي مرت لجميع الصفوف الثلاثة معاً.
+    </p>
+
+    <div class="form-group">
+      <label style="font-size: 14px; color: #1e1b4b; font-weight: bold; display: block; margin-bottom: 5px;">اختر تاريخ الاجتماع السابق:</label>
+      <select id="meetingDateSelect">
+        <option value="">جاري تحميل تواريخ الاجتماعات السابقة...</option>
+      </select>
+    </div>
+
+    <button type="button" class="btn-action btn-success-custom" onclick="fetchAttendanceBySelectedDate()">
+      عرض إحصائية هذا الاجتماع 📊
+    </button>
+
+    <div id="dateResultContainer" style="display: none; margin-top: 15px;"></div>
+  </div>
+</div>
+
+<script>
+async function loadMeetingDates() {
+  const select = document.getElementById('meetingDateSelect');
+  select.innerHTML = '<option value="">جاري تحميل تواريخ الاجتماعات السابقة...</option>';
+  
+  try {
+    const res = await apiGet('getAvailableMeetingDatesGlobal');
+    if (res.error) {
+      select.innerHTML = '<option value="">' + res.error + '</option>';
+      return;
+    }
+    
+    select.innerHTML = '';
+    if (res.dates && res.dates.length > 0) {
+      res.dates.forEach(function(item) {
+        const opt = document.createElement('option');
+        opt.value = item.colIndex;
+        opt.textContent = item.dateText;
+        select.appendChild(opt);
+      });
+    } else {
+      select.innerHTML = '<option value="">لا توجد اجتماعات سابقة مسجلة</option>';
+    }
+  } catch(e) {
+    select.innerHTML = '<option value="">خطأ في التحميل</option>';
+  }
+}
+
+async function fetchAttendanceBySelectedDate() {
+  playClickSound();
+  const select = document.getElementById('meetingDateSelect');
+  const colIndex = select.value;
+  const resultDiv = document.getElementById('dateResultContainer');
+  
+  if (!colIndex) {
+    alert("برجاء اختيار تاريخ الاجتماع أولاً!");
+    return;
+  }
+  
+  resultDiv.style.display = 'block';
+  resultDiv.innerHTML = '<div class="global-loader"><span></span><span></span><span></span></div>';
+  
+  try {
+    const res = await apiGet('getGlobalAttendanceByDate', { colIndex: parseInt(colIndex) });
+    if (res.error) {
+      resultDiv.innerHTML = '<span style="color: #ef4444; font-weight: bold;">' + res.error + '</span>';
+      return;
+    }
+    
+    resultDiv.innerHTML = `
+      <div style="background: #ffffff; border-radius: 12px; border: 1.5px solid #c5a059; padding: 18px; box-shadow: 0 4px 6px rgba(0,0,0,0.03);">
+        <span style="font-size: 14px; color: #b45309; font-weight: 900;">📅 اجتماع: ${res.meetingDate}</span><br>
+        <span style="color: #15803d; font-size: 36px; font-weight: 900; display: block; margin: 8px 0;">${res.percentage}%</span>
+        <span style="font-size: 14px; color: #1e1b4b; font-weight: 900;">إجمالي الحاضرين: ${res.presentCount} من ${res.totalCount} مخدوم</span>
+      </div>
+    `;
+  } catch(err) {
+    resultDiv.innerHTML = '<span style="color: red; font-weight: bold;">خطأ: ' + err.message + '</span>';
+  }
+}
+
+loadMeetingDates();
+</script>

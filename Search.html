@@ -1,0 +1,283 @@
+<div class="page-card animate-fade">
+  <div class="page-top-bar">
+    <button type="button" class="btn-home-icon" onclick="goToHome()" title="الرجوع للرئيسية">
+      🏠 الرئيسية
+    </button>
+    <h2 class="page-title-text">🔍 بحث وتعديل قاعدة البيانات</h2>
+  </div>
+
+  <div class="gold-divider"></div>
+
+  <!-- قسم البحث -->
+  <div id="searchMainSection">
+    <div class="search-box-container">
+      <div class="form-group">
+        <label>📂 اختر المجموعة أو نطاق البحث:</label>
+        <select id="searchSheetSelect" onclick="playClickSound()">
+          <option value="">-- جاري تحميل المجموعات --</option>
+          <option value="ALL">🌟 بحث في كل المجموعات معاً</option>
+        </select>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 0;">
+        <label>👤 اسم المخدوم (أو جزء منه):</label>
+        <input type="text" id="searchNameInput" placeholder="اكتب الاسم هنا للبحث الفوري..." autocomplete="off">
+      </div>
+    </div>
+
+    <button type="button" class="btn-action btn-primary-custom" onclick="executeSearch()">
+      🔍 بحث عن المخدوم
+    </button>
+
+    <div class="add-new-footer-box">
+      <p style="margin: 0 0 10px 0; font-size: 14px; color: #4b5563; font-weight: 900;">
+        لم تجد الاسم وتريد إضافته؟
+      </p>
+      <button type="button" class="btn-action btn-outline-custom" onclick="prepareAddNewUser()">
+        + إضافة مخدوم جديد
+      </button>
+    </div>
+  </div>
+
+  <!-- نموذج التعديل والإضافة -->
+  <div id="userFormSection" style="display: none;">
+    <div id="targetSheetBadge" class="badge-box">المجموعة:</div>
+
+    <form id="userDataForm" onsubmit="handleUserFormSubmit(event)">
+      <div class="form-group">
+        <label>الاسم الكامل:</label>
+        <input type="text" id="fullName" required>
+      </div>
+      <div class="form-group">
+        <label>العنوان:</label>
+        <input type="text" id="address" placeholder="العنوان أو المنطقة والشارع">
+      </div>
+      <div class="form-group">
+        <label>رقم الموبايل:</label>
+        <input type="tel" id="phone">
+      </div>
+      <div class="form-group">
+        <label>الكنيسة:</label>
+        <input type="text" id="church">
+      </div>
+      <div class="form-group">
+        <label>تاريخ الميلاد:</label>
+        <input type="text" id="birthDate" placeholder="YYYY/MM/DD">
+      </div>
+      <div class="form-group">
+        <label>المدرسة / الفصل:</label>
+        <input type="text" id="school">
+      </div>
+      <div class="form-group">
+        <label>شماس:</label>
+        <select id="deacon">
+          <option value="">اختر...</option>
+          <option value="نعم">نعم</option>
+          <option value="لا">لا</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>أب الاعتراف:</label>
+        <input type="text" id="confessor">
+      </div>
+      <div class="form-group">
+        <label>ملاحظات:</label>
+        <textarea id="notes" rows="2"></textarea>
+      </div>
+
+      <div class="btn-grid-custom">
+        <button type="submit" id="saveStudentButton" class="btn-action btn-success-custom">
+          💾 حفظ البيانات
+        </button>
+        <button type="button" class="btn-action btn-secondary-custom" onclick="backToSearchMainView()">
+          ⬅ رجوع للبحث
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div id="searchStatusMsg" style="text-align: center; margin-top: 15px;"></div>
+</div>
+
+<script>
+window.currentEditingSheet = "";
+window.isNewUserMode = false;
+window.originalEditingName = "";
+
+// تحميل أسماء الكشوف عبر API
+async function loadSearchSheetsList() {
+  try {
+    const res = await apiGet('getDataSheets');
+    const select = document.getElementById('searchSheetSelect');
+    if (!select) return;
+    select.innerHTML = '<option value="">-- اختر المجموعة أو النطاق --</option><option value="ALL">🌟 بحث في كل المجموعات معاً</option>';
+    if (res.sheets && res.sheets.length > 0) {
+      res.sheets.forEach(function(sheetName) {
+        select.appendChild(new Option(sheetName, sheetName));
+      });
+    }
+  } catch (err) {
+    showSearchStatus("❌ تعذر تحميل المجموعات: " + err.message, "red");
+  }
+}
+
+// البحث عن المخدوم
+async function executeSearch() {
+  playClickSound();
+  const sheetName = document.getElementById('searchSheetSelect').value;
+  const nameQuery = document.getElementById('searchNameInput').value.trim();
+
+  if (!sheetName) return alert("يرجى اختيار المجموعة أو النطاق أولاً!");
+  if (!nameQuery) return alert("يرجى كتابة اسم المخدوم للبحث عنه!");
+
+  showGlobalLoader();
+
+  try {
+    const res = await apiGet('searchInSheet', { sheetName: sheetName, nameQuery: nameQuery });
+    showSearchStatus("", "");
+
+    if (res && res.error) {
+      showSearchStatus(res.error, "red");
+    } else if (res && res.found) {
+      document.getElementById('targetSheetBadge').innerText = "المجموعة: " + res.sheetName;
+      document.getElementById('fullName').value = res.data.name || "";
+      document.getElementById('address').value = res.data.address || "";
+      document.getElementById('phone').value = res.data.phone || "";
+      document.getElementById('church').value = res.data.church || "";
+      document.getElementById('birthDate').value = res.data.birthDate || "";
+      document.getElementById('school').value = res.data.school || "";
+      document.getElementById('deacon').value = res.data.deacon || "";
+      document.getElementById('confessor').value = res.data.confessor || "";
+      document.getElementById('notes').value = res.data.notes || "";
+
+      window.currentEditingSheet = res.sheetName;
+      window.isNewUserMode = false;
+      window.originalEditingName = String(res.data.name || "");
+
+      document.getElementById('searchMainSection').style.display = 'none';
+      document.getElementById('userFormSection').style.display = 'block';
+    } else {
+      showSearchStatus("لم يتم العثور على المخدوم! اضغط 'إضافة مخدوم جديد' بالأسفل.", "#c5a059");
+    }
+  } catch (err) {
+    showSearchStatus("❌ فشل البحث: " + err.message, "red");
+  }
+}
+
+function prepareAddNewUser() {
+  playClickSound();
+  const sheetName = document.getElementById('searchSheetSelect').value;
+  const nameQuery = document.getElementById('searchNameInput').value.trim();
+
+  if (!sheetName || sheetName === "ALL") {
+    return alert("يرجى تحديد صف معين (أولى أو ثانية أو ثالثة) لإضافة المخدوم إليه بنجاح!");
+  }
+  if (!nameQuery) {
+    return alert("يرجى كتابة الاسم في مربع البحث أولاً لترحيله لنموذج الإضافة!");
+  }
+
+  window.currentEditingSheet = sheetName;
+  window.isNewUserMode = true;
+  window.originalEditingName = "";
+
+  document.getElementById('targetSheetBadge').innerText = "إضافة جديد في مجموعة: " + sheetName;
+  document.getElementById('fullName').value = nameQuery;
+
+  ['address', 'phone', 'church', 'birthDate', 'school', 'deacon', 'confessor', 'notes'].forEach(function(id) {
+    document.getElementById(id).value = '';
+  });
+
+  document.getElementById('searchMainSection').style.display = 'none';
+  document.getElementById('userFormSection').style.display = 'block';
+  showSearchStatus("", "");
+}
+
+function backToSearchMainView() {
+  playClickSound();
+  document.getElementById('userFormSection').style.display = 'none';
+  document.getElementById('searchMainSection').style.display = 'block';
+  document.getElementById('userDataForm').reset();
+  window.originalEditingName = "";
+  window.currentEditingSheet = "";
+  window.isNewUserMode = false;
+  showSearchStatus("", "");
+}
+
+async function handleUserFormSubmit(e) {
+  e.preventDefault();
+  playClickSound();
+
+  const saveButton = document.getElementById('saveStudentButton');
+  if (saveButton.disabled) return;
+  saveButton.disabled = true;
+
+  const formData = {
+    name: document.getElementById('fullName').value.trim(),
+    address: document.getElementById('address').value,
+    phone: document.getElementById('phone').value,
+    church: document.getElementById('church').value,
+    birthDate: document.getElementById('birthDate').value,
+    school: document.getElementById('school').value,
+    deacon: document.getElementById('deacon').value,
+    confessor: document.getElementById('confessor').value,
+    notes: document.getElementById('notes').value
+  };
+
+  if (!formData.name) {
+    saveButton.disabled = false;
+    return showSearchStatus("❌ يرجى إدخال اسم المخدوم.", "red");
+  }
+
+  showGlobalLoader();
+
+  try {
+    const res = await apiPost('saveDataToSheet', {
+      sheetName: window.currentEditingSheet,
+      formData: formData,
+      isNewUserMode: window.isNewUserMode,
+      originalStudentName: window.originalEditingName
+    });
+
+    saveButton.disabled = false;
+    const msg = res.message || (res.success ? "✅ تم الحفظ بنجاح!" : "❌ فشل الحفظ");
+    const isError = !res.success || msg.indexOf("❌") === 0 || msg.indexOf("⚠️") === 0;
+
+    showSearchStatus(msg, isError ? "red" : "#15803d");
+
+    if (res.success && msg.indexOf("✅") === 0) {
+      setTimeout(function() {
+        backToSearchMainView();
+      }, 1500);
+    }
+  } catch (err) {
+    saveButton.disabled = false;
+    showSearchStatus("❌ فشل الحفظ: " + err.message, "red");
+  }
+}
+
+function showGlobalLoader() {
+  const statusEl = document.getElementById('searchStatusMsg');
+  if (statusEl) {
+    statusEl.innerHTML = '<div class="global-loader"><span></span><span></span><span></span></div>';
+  }
+}
+
+function showSearchStatus(msg, color) {
+  const statusEl = document.getElementById('searchStatusMsg');
+  if (statusEl) {
+    statusEl.innerText = msg;
+    statusEl.style.color = color || "";
+  }
+}
+
+loadSearchSheetsList();
+</script>
+
+<style>
+.add-new-footer-box {
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 2px dashed #cbd5e1;
+  text-align: center;
+}
+</style>

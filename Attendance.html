@@ -1,0 +1,217 @@
+<div class="page-card animate-fade">
+  <div class="page-top-bar">
+    <button type="button" class="btn-home-icon" onclick="goToHome()" title="الرجوع للرئيسية">
+      🏠 الرئيسية
+    </button>
+    <h2 class="page-title-text">📋 تسجيل الحضور والغياب</h2>
+  </div>
+
+  <div class="gold-divider"></div>
+
+  <!-- الخطوة الأولى: اختيار الكشف والتاريخ -->
+  <div id="attStep1">
+    <div class="search-box-container">
+      <div class="form-group">
+        <label>📂 اختر فايل/كشف الحضور:</label>
+        <select id="attendSheetSelect" onchange="loadAttendanceDates()" onclick="playClickSound()">
+          <option value="">-- جاري تحميل كشوف الحضور --</option>
+        </select>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 0;">
+        <label>📅 اختر تاريخ الاجتماع:</label>
+        <select id="attendDateSelect" onclick="playClickSound()">
+          <option value="">-- اختر كشف الحضور أولاً --</option>
+        </select>
+      </div>
+    </div>
+
+    <button type="button" class="btn-action btn-primary-custom" onclick="loadStudentsList()">
+      📂 فتح كشف التسجيل
+    </button>
+    
+    <div style="margin: 14px 0;"></div>
+    
+    <button type="button" class="btn-action" style="width: 100%; background: #1e1b4b; color: #c5a059; border: 2.5px solid #c5a059;" onclick="navigateToService('QrScan')">
+      📸 مسح QR code
+    </button>
+  </div>
+
+  <!-- الخطوة الثانية: قائمة أسماء المخدومين وتسجيل الحضور -->
+  <div id="attStep2" style="display: none;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <span style="font-weight: 900; color: #1e1b4b; font-size: 16px;">حدد الحاضرين:</span>
+      <button type="button" class="btn-action" style="width: auto; padding: 8px 14px; font-size: 14px; background-color: #047857; color: white;" onclick="markAllPresent()">
+        ✓ تحديد الكل حاضر
+      </button>
+    </div>
+
+    <div class="full-page-container">
+      <div class="scroll-box" id="studentsListContainer"></div>
+      
+      <button type="button" class="btn-action btn-success-custom" style="margin-top: 16px;" onclick="submitAttendance()">
+        💾 حفظ الحضور في الشيت
+      </button>
+    </div>
+
+    <button type="button" class="btn-action btn-secondary-custom" style="margin-top: 12px;" onclick="backToAttStep1()">
+      ⬅ تغيير التاريخ أو الكشف
+    </button>
+  </div>
+
+  <div id="attStatusMsg" style="text-align: center; margin-top: 15px;"></div>
+</div>
+
+<script>
+// جلب كشوف الحضور فور فتح الصفحة
+async function initAttendanceSheets() {
+  try {
+    const res = await apiGet('getAttendanceSheets');
+    const select = document.getElementById('attendSheetSelect');
+    if (select) {
+      select.innerHTML = '<option value="">-- اختر فايل الحضور --</option>';
+      if (res.sheets && res.sheets.length > 0) {
+        res.sheets.forEach(function(s) {
+          select.appendChild(new Option(s, s));
+        });
+      }
+    }
+  } catch(e) {
+    showAttStatus("تعذر تحميل كشوف الحضور: " + e.message, "red");
+  }
+}
+
+async function loadAttendanceDates() {
+  const sheetName = document.getElementById('attendSheetSelect').value;
+  if (!sheetName) return;
+  
+  showAttLoader();
+  try {
+    const res = await apiGet('getAttendanceData', { sheetName: sheetName });
+    clearAttStatus();
+    if (res.error) return alert(res.error);
+    
+    const dateSelect = document.getElementById('attendDateSelect');
+    dateSelect.innerHTML = '<option value="">-- اختر التاريخ --</option>';
+    if (res.dates) {
+      res.dates.forEach(function(d) {
+        dateSelect.appendChild(new Option(d.dateText, d.colIndex));
+      });
+    }
+  } catch(err) {
+    showAttStatus("خطأ في قراءة التواريخ: " + err.message, "red");
+  }
+}
+
+async function loadStudentsList() {
+  playClickSound();
+  const sheetName = document.getElementById('attendSheetSelect').value;
+  const colIndex = document.getElementById('attendDateSelect').value;
+  
+  if (!sheetName || !colIndex) return alert("يرجى اختيار الكشف وتاريخ الاجتماع أولاً!");
+
+  showAttLoader();
+  try {
+    const res = await apiGet('getStudentsForDate', { sheetName: sheetName, colIndex: colIndex });
+    clearAttStatus();
+    if (res.error) return alert(res.error);
+    
+    const listDiv = document.getElementById('studentsListContainer');
+    listDiv.innerHTML = '';
+    
+    if (res.students) {
+      res.students.forEach(function(st) {
+        const row = document.createElement('div');
+        row.className = 'row-card';
+        const checkedAttr = st.isPresent ? 'checked' : '';
+        row.innerHTML = `
+          <label for="st_${st.rowIndex}">${st.name}</label>
+          <input type="checkbox" id="st_${st.rowIndex}" data-row="${st.rowIndex}" ${checkedAttr}>
+        `;
+        listDiv.appendChild(row);
+      });
+    }
+    
+    document.getElementById('attStep1').style.display = 'none';
+    document.getElementById('attStep2').style.display = 'block';
+  } catch(err) {
+    showAttStatus("خطأ في تحميل الطلاب: " + err.message, "red");
+  }
+}
+
+function markAllPresent() {
+  playClickSound();
+  document.querySelectorAll('#studentsListContainer input[type="checkbox"]').forEach(cb => cb.checked = true);
+}
+
+function backToAttStep1() {
+  playClickSound();
+  document.getElementById('attStep2').style.display = 'none';
+  document.getElementById('attStep1').style.display = 'block';
+  clearAttStatus();
+}
+
+async function submitAttendance() {
+  playClickSound();
+  const sheetName = document.getElementById('attendSheetSelect').value;
+  const colIndex = document.getElementById('attendDateSelect').value;
+  const attendanceList = [];
+  
+  document.querySelectorAll('#studentsListContainer input[type="checkbox"]').forEach(cb => {
+    attendanceList.push({ rowIndex: parseInt(cb.getAttribute('data-row')), isPresent: cb.checked });
+  });
+
+  showAttLoader();
+  try {
+    const res = await apiPost('saveAttendanceBatch', {
+      sheetName: sheetName,
+      colIndex: parseInt(colIndex),
+      attendanceList: attendanceList
+    });
+    showAttStatus(res.message || "تم حفظ الحضور بنجاح!", res.success ? "#15803d" : "red");
+  } catch(err) {
+    showAttStatus("خطأ في الحفظ: " + err.message, "red");
+  }
+}
+
+function showAttLoader() {
+  const statusEl = document.getElementById('attStatusMsg');
+  if (statusEl) {
+    statusEl.innerHTML = '<div class="global-loader"><span></span><span></span><span></span></div>';
+  }
+}
+
+function clearAttStatus() {
+  const statusEl = document.getElementById('attStatusMsg');
+  if (statusEl) statusEl.innerHTML = '';
+}
+
+function showAttStatus(msg, color) {
+  const statusEl = document.getElementById('attStatusMsg');
+  if (statusEl) {
+    statusEl.innerText = msg;
+    statusEl.style.color = color;
+  }
+}
+
+initAttendanceSheets();
+</script>
+
+<style>
+.row-card label { 
+  margin: 0; 
+  font-size: 17px; 
+  cursor: pointer; 
+  flex: 1; 
+  font-weight: 900; 
+  color: #1e1b4b; 
+  text-align: right;
+}
+
+.row-card input[type="checkbox"] { 
+  width: 26px; 
+  height: 26px; 
+  cursor: pointer; 
+  accent-color: #15803d; 
+}
+</style>

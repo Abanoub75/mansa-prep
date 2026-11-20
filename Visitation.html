@@ -1,0 +1,359 @@
+<div class="page-card animate-fade">
+  <div class="page-top-bar">
+    <button type="button" class="btn-home-icon" onclick="goToHome()" title="الرجوع للرئيسية">
+      🏠 الرئيسية
+    </button>
+    <h2 class="page-title-text">🤝 خدمة الافتقاد والمتابعة</h2>
+  </div>
+
+  <div class="gold-divider"></div>
+
+  <!-- القائمة الرئيسية لاختيار خدمة الافتقاد -->
+  <div id="visMainMenu">
+    <div class="search-box-container" style="text-align: center; padding: 20px;">
+      <p style="font-weight: 900; color: #1e1b4b; font-size: 17px; margin-bottom: 20px;">اختر خدمة الافتقاد المطلوبة:</p>
+      
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <button type="button" class="btn-action btn-primary-custom" onclick="selectVisService('regions')" style="padding: 16px; font-size: 17px;">
+          📍 1- كشف افتقاد حسب المنطقة (ترتيب الشوارع)
+        </button>
+        <button type="button" class="btn-action" onclick="selectVisService('absentees')" style="padding: 16px; font-size: 17px; background-color: #d97706; color: white;">
+          📋 2- غياب الاجتماع الأخير والمتابعة
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- خدمة 1: اختيار كشف/منطقة الافتقاد -->
+  <div id="visRegionStep1" style="display: none;">
+    <div class="search-box-container">
+      <div class="form-group" style="margin-bottom: 0;">
+        <label>📂 اختر المنطقة أو الشارع (الكشف):</label>
+        <select id="visSheetSelect" onchange="loadVisitationStudents()" onclick="playClickSound()">
+          <option value="">-- جاري تحميل المناطق --</option>
+        </select>
+      </div>
+    </div>
+    <button type="button" class="btn-action btn-secondary-custom" onclick="backToVisMain()" style="margin-top: 10px;">⬅ رجوع للقائمة الرئيسية</button>
+  </div>
+
+  <!-- عرض قائمة المخدومين للمنطقة -->
+  <div id="visRegionStep2" style="display: none;">
+    <div style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+      <span id="visGroupTitle" style="font-weight: 900; color: #1e1b4b; font-size: 16px;">قائمة المخدومين:</span>
+      <button type="button" class="btn-action" style="width: auto; padding: 6px 12px; font-size: 14px; background-color: #4b5563; color: white;" onclick="backToVisRegionStep1()">
+        ⬅ تغيير المنطقة
+      </button>
+    </div>
+
+    <div class="full-page-container">
+      <div class="scroll-box" id="visStudentsListContainer"></div>
+    </div>
+  </div>
+
+  <!-- خدمة 2: قائمة غياب الاجتماع الأخير -->
+  <div id="visAbsenteesView" style="display: none;">
+    <div style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+      <span id="absenteesHeaderTitle" style="font-weight: 900; color: #1e1b4b; font-size: 16px;">المتغيبون عن الاجتماع الأخير:</span>
+      <button type="button" class="btn-action" style="width: auto; padding: 6px 12px; font-size: 14px; background-color: #4b5563; color: white;" onclick="backToVisMain()">
+        ⬅ رجوع
+      </button>
+    </div>
+
+    <div class="search-box-container" style="margin-bottom: 14px;">
+      <label>📂 اختر شيت الحضور لاستنتاج الغياب:</label>
+      <select id="absentSheetSelect" onchange="loadLastMeetingAbsentees()" onclick="playClickSound()">
+        <option value="">-- جاري تحميل كشوف الحضور --</option>
+      </select>
+    </div>
+
+    <div class="full-page-container">
+      <div class="scroll-box" id="absenteesListContainer">
+        <div style="text-align:center; padding:20px; color:#4b5563; font-weight:900;">اختر كشف الحضور لعرض الغائبين...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- نافذة تسجيل تفاصيل زيارة الافتقاد -->
+  <div id="visFormStep" style="display: none;">
+    <div class="badge-box" id="visStudentNameBadge">المخدوم: </div>
+    
+    <form id="visForm" onsubmit="submitVisitation(event)">
+      <div class="form-group">
+        <label>📅 تاريخ الزيارة:</label>
+        <input type="date" id="visDate" required>
+      </div>
+      <div class="form-group">
+        <label>📞 وسيلة الافتقاد:</label>
+        <select id="visType">
+          <option value="زيارة منزلية">🏠 زيارة منزلية</option>
+          <option value="اتصال هاتفي">📱 اتصال هاتفي</option>
+          <option value="افتقاد بالكنيسة">⛪ افتقاد بالكنيسة</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>📝 تفاصيل وملاحظات الزيارة:</label>
+        <textarea id="visComment" rows="3" placeholder="اكتب تفاصيل الافتقاد أو سبب الغياب..." required></textarea>
+      </div>
+      
+      <div class="btn-grid-custom">
+        <button type="submit" class="btn-action btn-success-custom">💾 حفظ سجل الافتقاد</button>
+        <button type="button" class="btn-action btn-secondary-custom" onclick="cancelVisForm()">إلغاء</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="visStatusMsg" style="text-align: center; margin-top: 15px;"></div>
+</div>
+
+<script>
+window.currentVisSheet = "";
+window.currentVisRow = -1;
+
+function selectVisService(serviceType) {
+  playClickSound();
+  document.getElementById('visMainMenu').style.display = 'none';
+  clearVisStatus();
+
+  if (serviceType === 'regions') {
+    document.getElementById('visRegionStep1').style.display = 'block';
+    loadRegionSheets();
+  } else if (serviceType === 'absentees') {
+    document.getElementById('visAbsenteesView').style.display = 'block';
+    loadAttendanceSheetsForAbsents();
+  }
+}
+
+function backToVisMain() {
+  playClickSound();
+  ['visRegionStep1', 'visRegionStep2', 'visAbsenteesView', 'visFormStep'].forEach(function(id) {
+    document.getElementById(id).style.display = 'none';
+  });
+  document.getElementById('visMainMenu').style.display = 'block';
+  clearVisStatus();
+}
+
+async function loadRegionSheets() {
+  try {
+    const res = await apiGet('getVisitationSheetsList');
+    const select = document.getElementById('visSheetSelect');
+    if (select) {
+      select.innerHTML = '<option value="">-- اختر المنطقة أو الشارع --</option>';
+      if (res.sheets && res.sheets.length > 0) {
+        res.sheets.forEach(function(s) {
+          select.appendChild(new Option(s, s));
+        });
+      }
+    }
+  } catch(e) {}
+}
+
+async function loadVisitationStudents() {
+  const sheetName = document.getElementById('visSheetSelect').value;
+  if (!sheetName) return;
+
+  playClickSound();
+  showVisLoader();
+
+  try {
+    const res = await apiGet('getVisitationStudents', { sheetName: sheetName });
+    clearVisStatus();
+    if (res.error) return alert(res.error);
+
+    const container = document.getElementById('visStudentsListContainer');
+    container.innerHTML = '';
+
+    if (!res.students || res.students.length === 0) {
+      container.innerHTML = '<div style="text-align:center; padding:20px; font-weight:900; color:#4b5563;">لا يوجد مخدومين مسجلين في هذا الكشف</div>';
+    } else {
+      res.students.forEach(function(st) {
+        const card = document.createElement('div');
+        card.className = 'row-card';
+        card.style.flexDirection = 'column';
+        card.style.alignItems = 'flex-start';
+        card.style.gap = '6px';
+        
+        card.innerHTML = `
+          <div style="display:flex; justify-content:space-between; width:100%; align-items:center; border-bottom: 2px solid #eef2f7; padding-bottom: 8px; margin-bottom: 6px;">
+            <span style="font-weight:900; color:#1e3a8a; font-size:18px;">👤 ${st.name}</span>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:4px; width:100%; font-size:15px; font-weight:800; color:#4b5563; margin-bottom: 8px;">
+            <div>📍 الشارع: <span style="color:#111827;">${st.address}</span></div>
+            <div>🎓 الصف: <span style="color:#1e1b4b; background:#eef2f7; padding:2px 8px; border-radius:6px; display:inline-block;">${st.schoolClass || 'غير محدد'}</span></div>
+            <div>📞 الموبايل: <span style="color:#111827; direction:ltr; display:inline-block;">${st.phone}</span></div>
+          </div>
+
+          ${st.notes ? '<div style="font-size:13px; color:#92400e; background:#fef3c7; padding:6px 10px; border-radius:8px; width:100%; margin-bottom: 8px;">📌 ملاحظات: ' + st.notes + '</div>' : ''}
+
+          <div style="display:flex; gap:10px; width:100%; border-top: 2px solid #eef2f7; padding-top: 8px;">
+            <button type="button" class="btn-action btn-success-custom" style="flex:1; padding:10px; font-size:14px;" onclick="markVisitedQuick('${res.sheetName}', ${st.rowIndex}, this)">
+              ✓ تم الافتقاد
+            </button>
+            <button type="button" class="btn-action" style="flex:1; padding:10px; font-size:14px; background-color:#d97706; color:white;" onclick="openVisForm('${res.sheetName}', ${st.rowIndex}, '${st.name}')">
+              📝 زيارة
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    document.getElementById('visGroupTitle').innerText = "المنطقة: " + res.sheetName;
+    document.getElementById('visRegionStep1').style.display = 'none';
+    document.getElementById('visRegionStep2').style.display = 'block';
+  } catch(err) {
+    showVisStatus("خطأ: " + err.message, "red");
+  }
+}
+
+async function markVisitedQuick(sheetName, rowIndex, btnElement) {
+  playClickSound();
+  const now = new Date();
+  const dateStr = now.toISOString().split('T')[0];
+  const timeStr = now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+
+  const visitData = {
+    date: dateStr,
+    type: 'زيارة سريعة',
+    comment: 'تم الافتقاد بنجاح (' + timeStr + ')'
+  };
+
+  const card = btnElement.closest('.row-card');
+  card.style.opacity = '0.3';
+
+  try {
+    await apiPost('saveVisitationRecord', { sheetName, rowIndex, visitData });
+    card.remove();
+  } catch(e) {
+    card.style.opacity = '1';
+    alert("خطأ: " + e.message);
+  }
+}
+
+async function loadAttendanceSheetsForAbsents() {
+  try {
+    const res = await apiGet('getAttendanceSheets');
+    const select = document.getElementById('absentSheetSelect');
+    if (select) {
+      select.innerHTML = '<option value="">-- اختر شيت الحضور --</option>';
+      if (res.sheets && res.sheets.length > 0) {
+        res.sheets.forEach(function(s) {
+          select.appendChild(new Option(s, s));
+        });
+      }
+    }
+  } catch(e) {}
+}
+
+async function loadLastMeetingAbsentees() {
+  const sheetName = document.getElementById('absentSheetSelect').value;
+  if (!sheetName) return;
+
+  playClickSound();
+  showVisLoader();
+
+  try {
+    const res = await apiGet('getLastMeetingAbsentees', { sheetName: sheetName });
+    clearVisStatus();
+    if (res.error) return alert(res.error);
+
+    const container = document.getElementById('absenteesListContainer');
+    container.innerHTML = '';
+
+    if (!res.absentees || res.absentees.length === 0) {
+      container.innerHTML = '<div style="text-align:center; padding:20px; font-weight:900; color:#15803d;">لا يوجد غائبين في آخر اجتماع (' + (res.meetingDate || '') + ')! الكل حاضر.</div>';
+    } else {
+      document.getElementById('absenteesHeaderTitle').innerText = "متغيبو اجتماع: " + (res.meetingDate || '');
+      res.absentees.forEach(function(ab) {
+        const card = document.createElement('div');
+        card.className = 'row-card';
+        card.innerHTML = `
+          <span style="font-weight:900; color:#b91c1c; font-size:16px;">❌ ${ab.name}</span>
+          <span style="font-size:13px; background:#fee2e2; color:#991b1b; padding:6px 10px; border-radius:6px; font-weight:900;">غائب</span>
+        `;
+        container.appendChild(card);
+      });
+    }
+  } catch(err) {
+    showVisStatus("خطأ: " + err.message, "red");
+  }
+}
+
+function openVisForm(sheetName, rowIndex, studentName) {
+  playClickSound();
+  window.currentVisSheet = sheetName;
+  window.currentVisRow = rowIndex;
+  
+  document.getElementById('visStudentNameBadge').innerText = "المخدوم: " + studentName;
+  document.getElementById('visDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('visComment').value = '';
+
+  ['visRegionStep2', 'visAbsenteesView'].forEach(function(id) {
+    document.getElementById(id).style.display = 'none';
+  });
+  document.getElementById('visFormStep').style.display = 'block';
+}
+
+function cancelVisForm() {
+  playClickSound();
+  document.getElementById('visFormStep').style.display = 'none';
+  document.getElementById('visRegionStep2').style.display = 'block';
+}
+
+async function submitVisitation(e) {
+  e.preventDefault();
+  playClickSound();
+
+  const visitData = {
+    date: document.getElementById('visDate').value,
+    type: document.getElementById('visType').value,
+    comment: document.getElementById('visComment').value
+  };
+
+  showVisLoader();
+
+  try {
+    const res = await apiPost('saveVisitationRecord', {
+      sheetName: window.currentVisSheet,
+      rowIndex: window.currentVisRow,
+      visitData: visitData
+    });
+    showVisStatus(res.message || "تم تسجيل الافتقاد بنجاح!", "#15803d");
+    setTimeout(function() {
+      cancelVisForm();
+      clearVisStatus();
+      loadVisitationStudents();
+    }, 1500);
+  } catch(err) {
+    showVisStatus("خطأ: " + err.message, "red");
+  }
+}
+
+function backToVisRegionStep1() {
+  playClickSound();
+  document.getElementById('visRegionStep2').style.display = 'none';
+  document.getElementById('visRegionStep1').style.display = 'block';
+  clearVisStatus();
+}
+
+function showVisLoader() {
+  const statusEl = document.getElementById('visStatusMsg');
+  if (statusEl) {
+    statusEl.innerHTML = '<div class="global-loader"><span></span><span></span><span></span></div>';
+  }
+}
+
+function clearVisStatus() {
+  const statusEl = document.getElementById('visStatusMsg');
+  if (statusEl) statusEl.innerHTML = '';
+}
+
+function showVisStatus(msg, color) {
+  const statusEl = document.getElementById('visStatusMsg');
+  if (statusEl) {
+    statusEl.innerText = msg;
+    statusEl.style.color = color;
+  }
+}
+</script>
