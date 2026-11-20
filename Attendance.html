@@ -1,69 +1,57 @@
 <div class="page-card animate-fade">
-  <div class="page-top-bar">
-    <button type="button" class="btn-home-icon" onclick="goToHome()" title="الرجوع للرئيسية">
-      🏠 الرئيسية
-    </button>
-    <h2 class="page-title-text">📋 تسجيل الحضور والغياب</h2>
-  </div>
-
-  <div class="gold-divider"></div>
+  <h2 class="page-title">📋 تسجيل الحضور والغياب</h2>
 
   <!-- الخطوة الأولى: اختيار الكشف والتاريخ -->
   <div id="attStep1">
-    <div class="search-box-container">
-      <div class="form-group">
-        <label>📂 اختر فايل/كشف الحضور:</label>
-        <select id="attendSheetSelect" onchange="loadAttendanceDates()" onclick="playClickSound()">
-          <option value="">-- جاري تحميل كشوف الحضور --</option>
-        </select>
-      </div>
-
-      <div class="form-group" style="margin-bottom: 0;">
-        <label>📅 اختر تاريخ الاجتماع:</label>
-        <select id="attendDateSelect" onclick="playClickSound()">
-          <option value="">-- اختر كشف الحضور أولاً --</option>
-        </select>
-      </div>
+    <div class="form-group">
+      <label>📂 فايل/كشف الحضور:</label>
+      <select id="attendSheetSelect" onchange="loadAttendanceDates()" onclick="playClickSound()">
+        <option value="">-- جاري تحميل كشوف الحضور --</option>
+      </select>
     </div>
 
-    <button type="button" class="btn-action btn-primary-custom" onclick="loadStudentsList()">
+    <div class="form-group">
+      <label>📅 تاريخ الاجتماع:</label>
+      <select id="attendDateSelect" onclick="playClickSound()">
+        <option value="">-- اختر كشف الحضور أولاً --</option>
+      </select>
+    </div>
+
+    <button type="button" class="btn-action btn-primary" onclick="loadStudentsList()">
       📂 فتح كشف التسجيل
     </button>
     
-    <div style="margin: 14px 0;"></div>
-    
-    <button type="button" class="btn-action" style="width: 100%; background: #1e1b4b; color: #c5a059; border: 2.5px solid #c5a059;" onclick="navigateToService('QrScan')">
-      📸 مسح QR code
-    </button>
+    <div style="margin-top: 14px;">
+      <button type="button" class="btn-action btn-outline" onclick="navigateToService('QrScan')">
+        📸 مسح كود QR بالكاميرا
+      </button>
+    </div>
   </div>
 
   <!-- الخطوة الثانية: قائمة أسماء المخدومين وتسجيل الحضور -->
   <div id="attStep2" style="display: none;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-      <span style="font-weight: 900; color: #1e1b4b; font-size: 16px;">حدد الحاضرين:</span>
-      <button type="button" class="btn-action" style="width: auto; padding: 8px 14px; font-size: 14px; background-color: #047857; color: white;" onclick="markAllPresent()">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+      <span style="font-weight: 900; color: var(--primary); font-size: 16px;">قائمة الطلاب:</span>
+      <button type="button" class="btn-action btn-success" style="width: auto; height: 40px; padding: 0 16px; font-size: 14px;" onclick="markAllPresent()">
         ✓ تحديد الكل حاضر
       </button>
     </div>
 
-    <div class="full-page-container">
-      <div class="scroll-box" id="studentsListContainer"></div>
-      
-      <button type="button" class="btn-action btn-success-custom" style="margin-top: 16px;" onclick="submitAttendance()">
-        💾 حفظ الحضور في الشيت
-      </button>
-    </div>
+    <div class="scroll-box" id="studentsListContainer" style="max-height: 52vh; overflow-y: auto;"></div>
+    
+    <button type="button" class="btn-action btn-success" style="margin-top: 16px;" onclick="submitAttendance()">
+      💾 حفظ الحضور في الشيت
+    </button>
 
-    <button type="button" class="btn-action btn-secondary-custom" style="margin-top: 12px;" onclick="backToAttStep1()">
+    <button type="button" class="btn-action btn-secondary" style="margin-top: 10px;" onclick="backToAttStep1()">
       ⬅ تغيير التاريخ أو الكشف
     </button>
   </div>
 
-  <div id="attStatusMsg" style="text-align: center; margin-top: 15px;"></div>
+  <div id="attStatusMsg" style="text-align: center; margin-top: 15px; font-weight: 900;"></div>
 </div>
 
 <script>
-// جلب كشوف الحضور فور فتح الصفحة
 async function initAttendanceSheets() {
   try {
     const res = await apiGet('getAttendanceSheets');
@@ -125,8 +113,8 @@ async function loadStudentsList() {
         row.className = 'row-card';
         const checkedAttr = st.isPresent ? 'checked' : '';
         row.innerHTML = `
-          <label for="st_${st.rowIndex}">${st.name}</label>
-          <input type="checkbox" id="st_${st.rowIndex}" data-row="${st.rowIndex}" ${checkedAttr}>
+          <label for="st_${st.rowIndex}" style="flex:1; cursor:pointer; font-size:16px; font-weight:900;">${st.name}</label>
+          <input type="checkbox" id="st_${st.rowIndex}" data-row="${st.rowIndex}" ${checkedAttr} style="width:26px; height:26px; accent-color:#16a34a; cursor:pointer;">
         `;
         listDiv.appendChild(row);
       });
@@ -168,9 +156,9 @@ async function submitAttendance() {
       colIndex: parseInt(colIndex),
       attendanceList: attendanceList
     });
-    showAttStatus(res.message || "تم حفظ الحضور بنجاح!", res.success ? "#15803d" : "red");
+    showAttStatus(res.message || "تم حفظ الحضور بنجاح!", res.success ? "#16a34a" : "#dc2626");
   } catch(err) {
-    showAttStatus("خطأ في الحفظ: " + err.message, "red");
+    showAttStatus("خطأ في الحفظ: " + err.message, "#dc2626");
   }
 }
 
@@ -196,22 +184,3 @@ function showAttStatus(msg, color) {
 
 initAttendanceSheets();
 </script>
-
-<style>
-.row-card label { 
-  margin: 0; 
-  font-size: 17px; 
-  cursor: pointer; 
-  flex: 1; 
-  font-weight: 900; 
-  color: #1e1b4b; 
-  text-align: right;
-}
-
-.row-card input[type="checkbox"] { 
-  width: 26px; 
-  height: 26px; 
-  cursor: pointer; 
-  accent-color: #15803d; 
-}
-</style>

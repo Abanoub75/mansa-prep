@@ -1,64 +1,57 @@
 <div class="page-card animate-fade">
-  <div class="page-top-bar">
-    <button type="button" class="btn-home-icon" onclick="goToHome()" title="الرجوع للرئيسية">
-      🏠 الرئيسية
-    </button>
-    <h2 class="page-title-text">🔍 بحث وتعديل قاعدة البيانات</h2>
-  </div>
-
-  <div class="gold-divider"></div>
+  <h2 class="page-title">🔍 بحث وتعديل قاعدة البيانات</h2>
 
   <!-- قسم البحث -->
   <div id="searchMainSection">
-    <div class="search-box-container">
-      <div class="form-group">
-        <label>📂 اختر المجموعة أو نطاق البحث:</label>
-        <select id="searchSheetSelect" onclick="playClickSound()">
-          <option value="">-- جاري تحميل المجموعات --</option>
-          <option value="ALL">🌟 بحث في كل المجموعات معاً</option>
-        </select>
-      </div>
-
-      <div class="form-group" style="margin-bottom: 0;">
-        <label>👤 اسم المخدوم (أو جزء منه):</label>
-        <input type="text" id="searchNameInput" placeholder="اكتب الاسم هنا للبحث الفوري..." autocomplete="off">
-      </div>
+    <div class="form-group">
+      <label>📂 المجموعة أو نطاق البحث:</label>
+      <select id="searchSheetSelect" onclick="playClickSound()">
+        <option value="">-- جاري تحميل المجموعات --</option>
+        <option value="ALL">🌟 بحث في كل المجموعات معاً</option>
+      </select>
     </div>
 
-    <button type="button" class="btn-action btn-primary-custom" onclick="executeSearch()">
+    <div class="form-group">
+      <label>👤 اسم المخدوم:</label>
+      <input type="text" id="searchNameInput" placeholder="اكتب اسم المخدوم هنا للبحث الفوري..." autocomplete="off">
+    </div>
+
+    <button type="button" class="btn-action btn-primary" onclick="executeSearch()">
       🔍 بحث عن المخدوم
     </button>
 
-    <div class="add-new-footer-box">
-      <p style="margin: 0 0 10px 0; font-size: 14px; color: #4b5563; font-weight: 900;">
-        لم تجد الاسم وتريد إضافته؟
+    <div style="margin-top: 22px; padding-top: 16px; border-top: 1px dashed #cbd5e1; text-align: center;">
+      <p style="margin: 0 0 10px 0; font-size: 14px; color: #64748b; font-weight: 800;">
+        لم تجد الاسم وتريد إضافته لقاعدة البيانات؟
       </p>
-      <button type="button" class="btn-action btn-outline-custom" onclick="prepareAddNewUser()">
-        + إضافة مخدوم جديد
+      <button type="button" class="btn-action btn-outline" onclick="prepareAddNewUser()">
+        ➕ إضافة مخدوم جديد
       </button>
     </div>
   </div>
 
   <!-- نموذج التعديل والإضافة -->
   <div id="userFormSection" style="display: none;">
-    <div id="targetSheetBadge" class="badge-box">المجموعة:</div>
+    <div id="targetSheetBadge" style="background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; padding:12px; border-radius:14px; font-weight:900; text-align:center; margin-bottom:16px;">
+      المجموعة:
+    </div>
 
     <form id="userDataForm" onsubmit="handleUserFormSubmit(event)">
       <div class="form-group">
         <label>الاسم الكامل:</label>
-        <input type="text" id="fullName" required>
+        <input type="text" id="fullName" required placeholder="اسم المخدوم ثلاثي">
       </div>
       <div class="form-group">
         <label>العنوان:</label>
-        <input type="text" id="address" placeholder="العنوان أو المنطقة والشارع">
+        <input type="text" id="address" placeholder="المنطقة والشارع بالتفصيل">
       </div>
       <div class="form-group">
         <label>رقم الموبايل:</label>
-        <input type="tel" id="phone">
+        <input type="tel" id="phone" placeholder="010xxxxxxxx">
       </div>
       <div class="form-group">
         <label>الكنيسة:</label>
-        <input type="text" id="church">
+        <input type="text" id="church" placeholder="اسم الكنيسة">
       </div>
       <div class="form-group">
         <label>تاريخ الميلاد:</label>
@@ -66,7 +59,7 @@
       </div>
       <div class="form-group">
         <label>المدرسة / الفصل:</label>
-        <input type="text" id="school">
+        <input type="text" id="school" placeholder="المدرسة والصف الدراسي">
       </div>
       <div class="form-group">
         <label>شماس:</label>
@@ -78,25 +71,25 @@
       </div>
       <div class="form-group">
         <label>أب الاعتراف:</label>
-        <input type="text" id="confessor">
+        <input type="text" id="confessor" placeholder="أبونا المعترف">
       </div>
       <div class="form-group">
-        <label>ملاحظات:</label>
-        <textarea id="notes" rows="2"></textarea>
+        <label>ملاحظات خاصة:</label>
+        <textarea id="notes" rows="2" placeholder="أي ملاحظات تفصيلية..."></textarea>
       </div>
 
-      <div class="btn-grid-custom">
-        <button type="submit" id="saveStudentButton" class="btn-action btn-success-custom">
+      <div class="btn-grid">
+        <button type="submit" id="saveStudentButton" class="btn-action btn-success">
           💾 حفظ البيانات
         </button>
-        <button type="button" class="btn-action btn-secondary-custom" onclick="backToSearchMainView()">
-          ⬅ رجوع للبحث
+        <button type="button" class="btn-action btn-secondary" onclick="backToSearchMainView()">
+          ⬅ إلغاء ورجوع
         </button>
       </div>
     </form>
   </div>
 
-  <div id="searchStatusMsg" style="text-align: center; margin-top: 15px;"></div>
+  <div id="searchStatusMsg" style="text-align: center; margin-top: 15px; font-weight: 900; font-size: 15px;"></div>
 </div>
 
 <script>
@@ -104,7 +97,6 @@ window.currentEditingSheet = "";
 window.isNewUserMode = false;
 window.originalEditingName = "";
 
-// تحميل أسماء الكشوف عبر API
 async function loadSearchSheetsList() {
   try {
     const res = await apiGet('getDataSheets');
@@ -121,13 +113,12 @@ async function loadSearchSheetsList() {
   }
 }
 
-// البحث عن المخدوم
 async function executeSearch() {
   playClickSound();
   const sheetName = document.getElementById('searchSheetSelect').value;
   const nameQuery = document.getElementById('searchNameInput').value.trim();
 
-  if (!sheetName) return alert("يرجى اختيار المجموعة أو النطاق أولاً!");
+  if (!sheetName) return alert("يرجى اختيار المجموعة أولاً!");
   if (!nameQuery) return alert("يرجى كتابة اسم المخدوم للبحث عنه!");
 
   showGlobalLoader();
@@ -157,7 +148,7 @@ async function executeSearch() {
       document.getElementById('searchMainSection').style.display = 'none';
       document.getElementById('userFormSection').style.display = 'block';
     } else {
-      showSearchStatus("لم يتم العثور على المخدوم! اضغط 'إضافة مخدوم جديد' بالأسفل.", "#c5a059");
+      showSearchStatus("لم يتم العثور على المخدوم! يمكنك إضافته من الزر بالأسفل.", "#d97706");
     }
   } catch (err) {
     showSearchStatus("❌ فشل البحث: " + err.message, "red");
@@ -170,10 +161,10 @@ function prepareAddNewUser() {
   const nameQuery = document.getElementById('searchNameInput').value.trim();
 
   if (!sheetName || sheetName === "ALL") {
-    return alert("يرجى تحديد صف معين (أولى أو ثانية أو ثالثة) لإضافة المخدوم إليه بنجاح!");
+    return alert("يرجى تحديد صف معين (أولى أو ثانية أو ثالثة) لإضافة المخدوم إليه!");
   }
   if (!nameQuery) {
-    return alert("يرجى كتابة الاسم في مربع البحث أولاً لترحيله لنموذج الإضافة!");
+    return alert("يرجى كتابة الاسم في مربع البحث أولاً لترحيله للإضافة!");
   }
 
   window.currentEditingSheet = sheetName;
@@ -242,7 +233,7 @@ async function handleUserFormSubmit(e) {
     const msg = res.message || (res.success ? "✅ تم الحفظ بنجاح!" : "❌ فشل الحفظ");
     const isError = !res.success || msg.indexOf("❌") === 0 || msg.indexOf("⚠️") === 0;
 
-    showSearchStatus(msg, isError ? "red" : "#15803d");
+    showSearchStatus(msg, isError ? "#dc2626" : "#16a34a");
 
     if (res.success && msg.indexOf("✅") === 0) {
       setTimeout(function() {
@@ -251,7 +242,7 @@ async function handleUserFormSubmit(e) {
     }
   } catch (err) {
     saveButton.disabled = false;
-    showSearchStatus("❌ فشل الحفظ: " + err.message, "red");
+    showSearchStatus("❌ فشل الحفظ: " + err.message, "#dc2626");
   }
 }
 
@@ -272,12 +263,3 @@ function showSearchStatus(msg, color) {
 
 loadSearchSheetsList();
 </script>
-
-<style>
-.add-new-footer-box {
-  margin-top: 24px;
-  padding-top: 18px;
-  border-top: 2px dashed #cbd5e1;
-  text-align: center;
-}
-</style>

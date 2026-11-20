@@ -1,32 +1,18 @@
 <div class="page-card animate-fade">
-  <div class="page-top-bar">
-    <button type="button" class="btn-home-icon" onclick="goToHome()" title="الرجوع للرئيسية">
-      🏠 الرئيسية
-    </button>
-    <h2 class="page-title-text">📊 إحصائيات الخدمة</h2>
+  <h2 class="page-title">📊 إحصائيات ونسب الحضور</h2>
+
+  <div class="form-group">
+    <label>اختر تاريخ الاجتماع السابق:</label>
+    <select id="meetingDateSelect">
+      <option value="">جاري تحميل تواريخ الاجتماعات السابقة...</option>
+    </select>
   </div>
 
-  <div class="gold-divider"></div>
+  <button type="button" class="btn-action btn-primary" onclick="fetchAttendanceBySelectedDate()">
+    عرض إحصائية هذا الاجتماع 📊
+  </button>
 
-  <div class="search-box-container" style="text-align: center;">
-    <h3 style="color: #1e1b4b; margin-top: 0; margin-bottom: 10px; font-size: 18px;">📈 احصائيات الحضور الجماعية %</h3>
-    <p style="font-size: 13px; color: #64748b; margin-bottom: 15px; line-height: 1.5;">
-      استعرض نسب الحضور الإجمالية للاجتماعات السابقة التي مرت لجميع الصفوف الثلاثة معاً.
-    </p>
-
-    <div class="form-group">
-      <label style="font-size: 14px; color: #1e1b4b; font-weight: bold; display: block; margin-bottom: 5px;">اختر تاريخ الاجتماع السابق:</label>
-      <select id="meetingDateSelect">
-        <option value="">جاري تحميل تواريخ الاجتماعات السابقة...</option>
-      </select>
-    </div>
-
-    <button type="button" class="btn-action btn-success-custom" onclick="fetchAttendanceBySelectedDate()">
-      عرض إحصائية هذا الاجتماع 📊
-    </button>
-
-    <div id="dateResultContainer" style="display: none; margin-top: 15px;"></div>
-  </div>
+  <div id="dateResultContainer" style="display: none; margin-top: 18px;"></div>
 </div>
 
 <script>
@@ -79,10 +65,10 @@ async function fetchAttendanceBySelectedDate() {
     }
     
     resultDiv.innerHTML = `
-      <div style="background: #ffffff; border-radius: 12px; border: 1.5px solid #c5a059; padding: 18px; box-shadow: 0 4px 6px rgba(0,0,0,0.03);">
-        <span style="font-size: 14px; color: #b45309; font-weight: 900;">📅 اجتماع: ${res.meetingDate}</span><br>
-        <span style="color: #15803d; font-size: 36px; font-weight: 900; display: block; margin: 8px 0;">${res.percentage}%</span>
-        <span style="font-size: 14px; color: #1e1b4b; font-weight: 900;">إجمالي الحاضرين: ${res.presentCount} من ${res.totalCount} مخدوم</span>
+      <div style="background: #f8fafc; border-radius: 18px; border: 1.5px solid #cbd5e1; padding: 22px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+        <span style="font-size: 15px; color: #d97706; font-weight: 900;">📅 اجتماع: ${res.meetingDate}</span><br>
+        <span style="color: #16a34a; font-size: 42px; font-weight: 900; display: block; margin: 10px 0;">${res.percentage}%</span>
+        <span style="font-size: 15px; color: var(--primary); font-weight: 900;">إجمالي الحاضرين: ${res.presentCount} من ${res.totalCount} مخدوم</span>
       </div>
     `;
   } catch(err) {

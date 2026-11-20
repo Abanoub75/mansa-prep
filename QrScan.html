@@ -1,12 +1,5 @@
 <div class="page-card animate-fade">
-  <div class="page-top-bar">
-    <button type="button" class="btn-home-icon" onclick="goToHome()" title="الرجوع للرئيسية">
-      🏠 الرئيسية
-    </button>
-    <h2 class="page-title-text">📷 مسح كود QR لتسجيل الحضور</h2>
-  </div>
-
-  <div class="gold-divider"></div>
+  <h2 class="page-title">📷 مسح كود QR لتسجيل الحضور</h2>
 
   <div class="form-group">
     <label for="qrAttendanceSheetSelect">📂 اختر كشف الحضور (الصف):</label>
@@ -19,16 +12,16 @@
   </div>
 
   <input id="qrImageInput" type="file" accept="image/*" capture="environment" style="display:none;">
-  <button id="scanButton" class="btn-action" style="background: linear-gradient(135deg,#d97706,#b45309); color: white;" type="button" disabled>
-    📷 تصوير كارت الحضور وقراءة QR
+  <button id="scanButton" class="btn-action btn-warning" type="button" disabled style="margin-top: 10px;">
+    📷 فتح الكاميرا وقراءة QR
   </button>
   
-  <p style="font-size: 13px; line-height: 1.8; color: #475569; margin-top: 12px;">
-    اضغط الزر لفتح كاميرا الهاتف الخلفية وتصوير الكارت. بعد التقاط الصورة ستتم قراءة كود QR تلقائياً وتسجيل الحضور فوراً في الشيت.
+  <p style="font-size: 13px; line-height: 1.7; color: #64748b; margin-top: 14px; text-align: center;">
+    اضغط الزر لفتح كاميرا الهاتف وتصوير كارت المخدوم. ستتم قراءة الكود فوراً وتسجيل حضوره في الشيت.
   </p>
   
-  <img id="scanPreview" alt="صورة كارت الحضور" style="width: 100%; max-height: 300px; object-fit: contain; margin-top: 15px; display: none; border-radius: 12px;">
-  <div id="resultAlert" style="display:none; padding:14px; border-radius:12px; margin-top:16px; text-align:center; font-weight:900;"></div>
+  <img id="scanPreview" alt="صورة كارت الحضور" style="width: 100%; max-height: 260px; object-fit: contain; margin-top: 15px; display: none; border-radius: 14px; border: 1px solid #cbd5e1;">
+  <div id="resultAlert" style="display:none; padding:14px; border-radius:14px; margin-top:16px; text-align:center; font-weight:900; font-size:15px;"></div>
 </div>
 
 <div id="qr-file-reader" style="display:none;"></div>
@@ -50,11 +43,11 @@ function alertUser(message, type) {
   box.textContent = message;
   box.style.display = 'block';
   if (type === 'success') {
-    box.style.background = '#dcfce7'; box.style.color = '#166534'; box.style.border = '2px solid #22c55e';
+    box.style.background = '#dcfce7'; box.style.color = '#15803d'; box.style.border = '1.5px solid #86efac';
   } else if (type === 'error') {
-    box.style.background = '#fee2e2'; box.style.color = '#991b1b'; box.style.border = '2px solid #ef4444';
+    box.style.background = '#fee2e2'; box.style.color = '#b91c1c'; box.style.border = '1.5px solid #fca5a5';
   } else {
-    box.style.background = '#dbeafe'; box.style.color = '#1e40af'; box.style.border = '2px solid #60a5fa';
+    box.style.background = '#eff6ff'; box.style.color = '#1d4ed8'; box.style.border = '1.5px solid #bfdbfe';
   }
 }
 

@@ -2,75 +2,169 @@
 <html dir="rtl" lang="ar">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>منصة خدمة فتيان إعدادي - كنيسة العذراء مريم بطما</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>منصة خدمة فتيان إعدادي</title>
   <!-- خط كايرو الفخم -->
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&display=swap" rel="stylesheet">
-  <!-- ملف التنسيقات الفخم الشامل -->
+  <!-- ستايل التطبيق للموبايل -->
   <link rel="stylesheet" href="style.css">
   <!-- مكتبة مسح QR Code -->
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-  <!-- محرك الـ API المشترك -->
+  <!-- محرك الـ API -->
   <script src="api.js"></script>
 </head>
 <body>
 
-  <div class="content-container">
-
-    <!-- الصفحة الرئيسية -->
-    <div id="pageHome" class="page-section active">
-      <div class="home-hero">
-        <p style="font-size: 16px; font-weight: 900; color: #1b1b40; margin: 6px 0;">مَنْ أَرَادَ أَنْ يَكُونَ أَوَّلاً فَلْيَكُنْ خَادِماً لِلْجَمِيعِ</p>
-        <h1 style="font-size: 22px; font-weight: 900; color: #1b1b40; margin: 8px 0 4px 0;">منصة خدمة فتيان إعدادي</h1>
-        <p style="font-size: 15px; color: #d97706; font-weight: 900; margin-bottom: 25px;">كنيسة العذراء مريم بطما</p>
-        
-        <div>
-          <img src="https://lh3.googleusercontent.com/d/1JQ3i6thxjKaDacK8-deyUxloTZYIJefQ" alt="لوجو الخدمة" style="width: 150px; height: 150px; object-fit: contain; border-radius: 50%; padding: 6px; background: #fff; border: 3px solid #fbbf24; box-shadow: 0 10px 25px rgba(217, 119, 6, 0.25); margin-bottom: 25px;">
-        </div>
-
-        <div style="background: #f8fafc; border: 2.5px solid #cbd5e1; border-radius: 18px; padding: 20px; text-align: right;">
-          <label style="display: block; font-weight: 900; color: #1b1b40; font-size: 16px; margin-bottom: 12px;">📂 اختر الخدمة المطلوبة للانتقال:</label>
-          <select id="mainServiceSelect" onchange="navigateToService(this.value)">
-            <option value="">-- اضغط هنا لاختيار القسم --</option>
-            <option value="Search">1. بحث وتعديل اسماء قاعدة البيانات</option>
-            <option value="Attendance">2. تسجيل الحضور والغياب</option>
-            <option value="QrScan">3. مسح كود QR لتسجيل الحضور</option>
-            <option value="Visitation">4. الافتقاد</option>
-            <option value="Stats">5. إحصائيات</option>
-            <option value="Trips">6. حجز رحلات</option>
-            <option value="Fruits">7. ثمار العام</option>
-          </select>
-        </div>
+  <!-- شريط التطبيق العلوي الثابت -->
+  <header class="mobile-app-header">
+    <div class="header-brand">
+      <img src="https://lh3.googleusercontent.com/d/1JQ3i6thxjKaDacK8-deyUxloTZYIJefQ" alt="لوجو الخدمة" class="header-logo">
+      <div class="header-titles">
+        <h1 id="appHeaderTitle">خدمة فتيان إعدادي</h1>
+        <p>كنيسة العذراء مريم بطما</p>
       </div>
     </div>
+    <button id="btnHeaderBack" class="btn-header-back" style="display: none;" onclick="goToHome()">
+      <span>الرئيسية</span> 🏠
+    </button>
+  </header>
 
-    <!-- حاوية عرض الصفحات الفرعية ديناميكياً -->
-    <div id="dynamicPageContainer" class="page-section"></div>
+  <!-- محتوى التطبيق -->
+  <main class="mobile-container">
 
-  </div>
+    <!-- الشاشة الرئيسية: شبكة كروت الخدمات الفخمة -->
+    <div id="pageHome" class="page-view active">
+      
+      <!-- بانر الآية الروحية -->
+      <div class="spiritual-banner">
+        <p class="spiritual-verse">«مَنْ أَرَادَ أَنْ يَكُونَ فِيكُمْ أَوَّلاً، فَلْيَكُنْ لِلْجَمِيعِ خَادِماً»</p>
+        <p class="spiritual-sub">منصة المتابعة وإدارة الخدمة المتكاملة</p>
+      </div>
+
+      <div class="services-title">
+        <span>📂 خدمات وأقسام المنصة</span>
+      </div>
+
+      <!-- شبكة الخدمات (2 أعمدة للموبايل) -->
+      <div class="services-grid">
+
+        <!-- 1. قاعدة البيانات -->
+        <div class="service-card" onclick="navigateToService('Search')">
+          <div class="service-icon-box icon-blue">🔍</div>
+          <h2 class="service-card-title">قاعدة البيانات</h2>
+          <p class="service-card-desc">بحث وتعديل وإضافة مخدوم</p>
+        </div>
+
+        <!-- 2. تسجيل الحضور -->
+        <div class="service-card" onclick="navigateToService('Attendance')">
+          <div class="service-icon-box icon-green">📋</div>
+          <h2 class="service-card-title">تسجيل الحضور</h2>
+          <p class="service-card-desc">كشوف الاجتماع الأسبوعي</p>
+        </div>
+
+        <!-- 3. ماسح QR -->
+        <div class="service-card" onclick="navigateToService('QrScan')">
+          <div class="service-icon-box icon-purple">📸</div>
+          <h2 class="service-card-title">مسح QR</h2>
+          <p class="service-card-desc">تسجيل الحضور بالكاميرا</p>
+        </div>
+
+        <!-- 4. الافتقاد -->
+        <div class="service-card" onclick="navigateToService('Visitation')">
+          <div class="service-icon-box icon-amber">🤝</div>
+          <h2 class="service-card-title">خدمة الافتقاد</h2>
+          <p class="service-card-desc">المناطق وغياب الاجتماع</p>
+        </div>
+
+        <!-- 5. الإحصائيات -->
+        <div class="service-card" onclick="navigateToService('Stats')">
+          <div class="service-icon-box icon-cyan">📊</div>
+          <h2 class="service-card-title">الإحصائيات</h2>
+          <p class="service-card-desc">نسب وتقارير الحضور</p>
+        </div>
+
+        <!-- 6. حجز الرحلات -->
+        <div class="service-card" onclick="navigateToService('Trips')">
+          <div class="service-icon-box icon-indigo">🚌</div>
+          <h2 class="service-card-title">حجز الرحلات</h2>
+          <p class="service-card-desc">المؤتمرات والمصايف</p>
+        </div>
+
+        <!-- 7. ثمار العام -->
+        <div class="service-card" style="grid-column: span 2;" onclick="navigateToService('Fruits')">
+          <div class="service-icon-box icon-rose">🎉</div>
+          <h2 class="service-card-title">ثمار العام والأنشطة</h2>
+          <p class="service-card-desc">معرض صور الذكريات والأنشطة والرحلات</p>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- حاوية الصفحات الفرعية المحملة ديناميكياً -->
+    <div id="dynamicPageContainer" style="display: none;"></div>
+
+  </main>
+
+  <!-- شريط التنقل السفلي السريع لتجربة التطبيق الحقيقية -->
+  <nav class="mobile-bottom-nav">
+    <div class="nav-item active" id="navHome" onclick="goToHome()">
+      <span class="nav-icon">🏠</span>
+      <span>الرئيسية</span>
+    </div>
+    <div class="nav-item" id="navSearch" onclick="navigateToService('Search')">
+      <span class="nav-icon">🔍</span>
+      <span>البحث</span>
+    </div>
+    <div class="nav-item" id="navAttendance" onclick="navigateToService('Attendance')">
+      <span class="nav-icon">📋</span>
+      <span>الحضور</span>
+    </div>
+    <div class="nav-item" id="navVisitation" onclick="navigateToService('Visitation')">
+      <span class="nav-icon">🤝</span>
+      <span>الافتقاد</span>
+    </div>
+    <div class="nav-item" id="navTrips" onclick="navigateToService('Trips')">
+      <span class="nav-icon">🚌</span>
+      <span>الرحلات</span>
+    </div>
+  </nav>
 
   <script>
+    const serviceTitles = {
+      'Search': '🔍 قاعدة البيانات',
+      'Attendance': '📋 تسجيل الحضور والغياب',
+      'QrScan': '📸 مسح كود QR',
+      'Visitation': '🤝 خدمة الافتقاد والمتابعة',
+      'Stats': '📊 إحصائيات الحضور',
+      'Trips': '🚌 حجز الرحلات والمؤتمرات',
+      'Fruits': '🎉 ثمار العام والأنشطة'
+    };
+
     function navigateToService(pageName) {
       if (!pageName) return;
       playClickSound();
+      updateBottomNav(pageName);
       loadSubPage(pageName);
     }
 
     async function loadSubPage(pageName) {
-      const homeSection = document.getElementById('pageHome');
-      if (homeSection) homeSection.style.display = 'none';
-      
+      document.getElementById('pageHome').style.display = 'none';
       const container = document.getElementById('dynamicPageContainer');
       container.style.display = 'block';
       container.innerHTML = '<div class="global-loader"><span></span><span></span><span></span></div>';
 
+      // تحديث شريط الرأس وزر الرجوع
+      document.getElementById('appHeaderTitle').innerText = serviceTitles[pageName] || 'خدمة فتيان إعدادي';
+      document.getElementById('btnHeaderBack').style.display = 'flex';
+
       try {
         const response = await fetch(pageName + '.html');
-        if (!response.ok) throw new Error("تعذر تحميل ملف " + pageName + ".html");
+        if (!response.ok) throw new Error("تعذر تحميل الملف " + pageName + ".html");
         const htmlContent = await response.text();
         container.innerHTML = htmlContent;
 
-        // تنفيذ السكربتات المدمجة داخل الصفحة الفرعية
+        // تشغيل السكربتات المدمجة
         const scripts = container.querySelectorAll("script");
         scripts.forEach(oldScript => {
           const newScript = document.createElement("script");
@@ -81,43 +175,29 @@
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } catch (err) {
-        container.innerHTML = '<div style="text-align:center; color:#991b1b; padding:20px; font-weight:900;">❌ خطأ في تحميل الصفحة: ' + err.message + '</div>';
+        container.innerHTML = '<div style="text-align:center; color:#dc2626; padding:25px; font-weight:900;">❌ خطأ في تحميل الصفحة: ' + err.message + '</div>';
       }
     }
 
     function goToHome() {
       playClickSound();
+      updateBottomNav('Home');
       const container = document.getElementById('dynamicPageContainer');
       container.style.display = 'none';
       container.innerHTML = '';
-      
-      const homeSection = document.getElementById('pageHome');
-      if (homeSection) homeSection.style.display = 'block';
-      
-      const mainSelect = document.getElementById('mainServiceSelect');
-      if (mainSelect) mainSelect.value = "";
+      document.getElementById('pageHome').style.display = 'block';
+
+      // إعادة عنوان الرأس وإخفاء زر الرجوع
+      document.getElementById('appHeaderTitle').innerText = 'خدمة فتيان إعدادي';
+      document.getElementById('btnHeaderBack').style.display = 'none';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  </script>
 
-  <style>
-    .home-hero {
-      text-align: center;
-      padding: 40px 24px;
-      background: #ffffff;
-      border-radius: 28px;
-      box-shadow: 0 15px 35px rgba(30, 27, 75, 0.1);
-      border: 3px solid #fbbf24;
-      position: relative;
-      overflow: hidden;
+    function updateBottomNav(activeName) {
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      const activeEl = document.getElementById('nav' + activeName);
+      if (activeEl) activeEl.classList.add('active');
     }
-    .home-hero::before {
-      content: '';
-      position: absolute;
-      top: 0; right: 0; left: 0;
-      height: 8px;
-      background: linear-gradient(90deg, #d97706, #fbbf24, #d97706);
-    }
-  </style>
+  </script>
 </body>
 </html>

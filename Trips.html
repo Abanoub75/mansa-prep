@@ -1,136 +1,106 @@
 <div class="page-card animate-fade">
-  <div class="page-top-bar">
-    <button type="button" class="btn-home-icon" onclick="goToHome()" title="الرجوع للرئيسية">
-      🏠 الرئيسية
-    </button>
-    <h2 class="page-title-text">🚌 حجز رحلات ومؤتمرات الخدمة</h2>
-  </div>
+  <h2 class="page-title">🚌 حجز رحلات ومؤتمرات الخدمة</h2>
 
-  <div class="gold-divider"></div>
-
-  <!-- زر عرض قائمة الحاجزين -->
+  <!-- زر تقرير الحاجزين -->
   <div id="mainReportBtnContainer" style="margin-bottom: 16px;">
-    <button type="button" class="btn-action" style="background-color: #1e1b4b; color: #fde047; border: 2.5px solid #c5a059;" onclick="openTripReportSelection()">
-      📊 عدد الحاجزين الآن (عرض وتعديل البيانات)
+    <button type="button" class="btn-action btn-primary" onclick="openTripReportSelection()">
+      📊 عرض وتعديل بيانات الحاجزين
     </button>
   </div>
 
   <!-- قسم اختيار الرحلة لعرض حاجيها -->
-  <div id="reportTripSelectSection" style="display: none;" class="search-box-container">
-    <div class="form-group" style="margin-bottom: 12px;">
-      <label>📂 اختر الرحلة لعرض حاجيها:</label>
+  <div id="reportTripSelectSection" style="display: none; background: #f8fafc; padding: 16px; border-radius: 16px; margin-bottom: 16px; border: 1px solid #e2e8f0;">
+    <div class="form-group">
+      <label>📂 اختر الرحلة لعرض المسجلين:</label>
       <select id="reportTripSelect" onchange="loadBookingsForSelectedTrip()" onclick="playClickSound()">
         <option value="">-- اختر الرحلة المطلوبة --</option>
       </select>
     </div>
-    <button type="button" class="btn-action btn-secondary-custom" style="padding: 12px; font-size: 15px;" onclick="closeTripReportSelection()">
-      ⬅ إرجاع والرجوع للحجز
+    <button type="button" class="btn-action btn-secondary" onclick="closeTripReportSelection()">
+      ⬅ إرجاع والرجوع لنموذج الحجز
     </button>
   </div>
 
   <!-- الخطوة الأولى: اختيار الرحلة للتسجيل -->
   <div id="tripStep1">
-    <div class="search-box-container">
-      <div class="form-group" style="margin-bottom: 0;">
-        <label>📂 اختر الرحلة المتاحة للتسجيل:</label>
-        <select id="tripSelect" onchange="onTripSelected()" onclick="playClickSound()">
-          <option value="">-- جاري تحميل الرحلات المتاحة --</option>
-        </select>
-      </div>
+    <div class="form-group">
+      <label>📂 اختر الرحلة المتاحة للتسجيل:</label>
+      <select id="tripSelect" onchange="onTripSelected()" onclick="playClickSound()">
+        <option value="">-- جاري تحميل الرحلات --</option>
+      </select>
     </div>
   </div>
 
   <!-- الخطوة الثانية: نموذج بيانات الحجز للرحلة المحددة -->
   <div id="tripStep2" style="display: none;">
     <div style="margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
-      <span id="selectedTripTitle" style="font-weight: 900; color: #1e1b4b; font-size: 16px;">حجز رحلة: </span>
-      <button type="button" class="btn-action" style="width: auto; padding: 8px 14px; font-size: 14px; background-color: #4b5563; color: white;" onclick="backToTripStep1()">
+      <span id="selectedTripTitle" style="font-weight: 900; color: var(--primary); font-size: 16px;">حجز رحلة: </span>
+      <button type="button" class="btn-action btn-secondary" style="width: auto; height: 38px; padding: 0 14px; font-size: 13px;" onclick="backToTripStep1()">
         ⬅ تغيير الرحلة
       </button>
     </div>
 
     <form id="tripForm" onsubmit="submitTripBooking(event)">
       <div class="form-group">
-        <label>👤 اسم الخادم المسؤول عن الحجز:</label>
-        <input type="text" id="servantNameInput" placeholder="اكتب اسم الخادم الثلاثي..." required>
+        <label>👤 اسم الخادم المسجل:</label>
+        <input type="text" id="servantNameInput" placeholder="اسم الخادم" required>
       </div>
 
       <div class="form-group">
         <label>👤 اسم المخدوم:</label>
-        <input type="text" id="tripName" placeholder="اكتب اسم المخدوم الثلاثي..." required>
+        <input type="text" id="tripName" placeholder="اسم المخدوم ثلاثي" required>
       </div>
       <div class="form-group">
         <label>📞 رقم الموبايل:</label>
         <input type="tel" id="tripPhone" placeholder="010xxxxxxxx" required>
       </div>
-      <div class="form-group">
-        <label>💵 المبلغ المدفوع:</label>
-        <input type="number" id="tripPaid" placeholder="0" value="0" required>
-      </div>
-      <div class="form-group">
-        <label>⏳ المبلغ المتبقي:</label>
-        <input type="number" id="tripRemaining" placeholder="0" value="0" required>
+      <div style="display: flex; gap: 10px;">
+        <div class="form-group" style="flex: 1;">
+          <label>💵 المدفوع:</label>
+          <input type="number" id="tripPaid" value="0" required>
+        </div>
+        <div class="form-group" style="flex: 1;">
+          <label>⏳ المتبقي:</label>
+          <input type="number" id="tripRemaining" value="0" required>
+        </div>
       </div>
       <div class="form-group">
         <label>🏷️ قيمة اشتراك الرحلة:</label>
-        <input type="number" id="tripSubscription" placeholder="0" value="0" required>
+        <input type="number" id="tripSubscription" value="0" required>
       </div>
 
-      <div class="btn-grid-custom">
-        <button type="submit" class="btn-action btn-success-custom">💾 تأكيد وتسجيل الحجز</button>
-        <button type="button" class="btn-action btn-secondary-custom" onclick="backToTripStep1()">إلغاء</button>
+      <div class="btn-grid">
+        <button type="submit" class="btn-action btn-success">💾 تأكيد الحجز</button>
+        <button type="button" class="btn-action btn-secondary" onclick="backToTripStep1()">إلغاء</button>
       </div>
     </form>
   </div>
 
   <!-- قسم عرض بطاقات الحاجزين للرحلة المختارة وتعديلهم -->
-  <div id="bookingsReportSection" style="display: none; background: #f8fafc; padding: 18px; border-radius: 16px; border: 2.5px solid #c5a059; margin-top: 16px;">
-    <h3 id="reportSectionTitle" style="color: #1e1b4b; text-align: center; margin-bottom: 16px; font-size: 17px; font-weight: 900;">👥 حاجزين رحلة:</h3>
-    <div id="bookingsTableContainer">
-      <p style="text-align: center; color: #64748b; font-weight: 900;">اختر الرحلة لعرض حاجيها...</p>
-    </div>
-    <button type="button" class="btn-action btn-secondary-custom" style="margin-top: 16px; width: 100%;" onclick="backToReportSelection()">⬅ اختيار رحلة أخرى</button>
+  <div id="bookingsReportSection" style="display: none; background: #f8fafc; padding: 16px; border-radius: 16px; margin-top: 16px; border: 1px solid #e2e8f0;">
+    <h3 id="reportSectionTitle" style="color: var(--primary); text-align: center; margin: 0 0 14px 0; font-size: 16px; font-weight: 900;">👥 قائمة المسجلين:</h3>
+    <div id="bookingsTableContainer"></div>
+    <button type="button" class="btn-action btn-secondary" style="margin-top: 14px;" onclick="backToReportSelection()">⬅ اختيار رحلة أخرى</button>
   </div>
 
-  <div id="tripStatusMsg" style="text-align: center; margin-top: 15px;"></div>
+  <div id="tripStatusMsg" style="text-align: center; margin-top: 15px; font-weight: 900;"></div>
 </div>
 
 <!-- نافذة تعديل بيانات الحجز المنبثقة (Modal) -->
-<div id="editBookingModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
-  <div style="background:white; padding:22px; border-radius:16px; width:92%; max-width:450px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border: 2.5px solid #c5a059;">
-    <h3 style="margin-top:0; color:#1e1b4b; text-align:center; border-bottom:2px solid #e2e8f0; padding-bottom:12px; font-weight: 900; font-size: 18px;">📋 تعديل بيانات الحجز</h3>
-    
+<div id="editBookingModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center; padding: 16px;">
+  <div style="background:white; padding:20px; border-radius:20px; width:100%; max-width:420px; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">
+    <h3 style="margin-top:0; color:var(--primary); text-align:center; border-bottom:1px solid #e2e8f0; padding-bottom:10px; font-weight: 900; font-size: 17px;">📋 تعديل بيانات الحجز</h3>
     <input type="hidden" id="editRowIndex">
-    
-    <div class="form-group" style="margin-bottom:14px;">
-      <label>👤 اسم المخدوم:</label>
-      <input type="text" id="editMemberName">
+    <div class="form-group"><label>👤 اسم المخدوم:</label><input type="text" id="editMemberName"></div>
+    <div class="form-group"><label>🚌 اسم الرحلة:</label><input type="text" id="editTripName"></div>
+    <div class="form-group"><label>👤 الخادم الحاجز:</label><input type="text" id="editServantName"></div>
+    <div style="display:flex; gap:10px;">
+      <div style="flex:1;" class="form-group"><label>💵 المدفوع:</label><input type="text" id="editPaid"></div>
+      <div style="flex:1;" class="form-group"><label>⏳ الباقي:</label><input type="text" id="editRemaining"></div>
     </div>
-    
-    <div class="form-group" style="margin-bottom:14px;">
-      <label>🚌 اسم الرحلة:</label>
-      <input type="text" id="editTripName">
-    </div>
-
-    <div class="form-group" style="margin-bottom:14px;">
-      <label>👤 الخادم الحاجز:</label>
-      <input type="text" id="editServantName">
-    </div>
-
-    <div style="display:flex; gap:12px; margin-bottom:14px;">
-      <div style="flex:1;" class="form-group">
-        <label>💵 المدفوع:</label>
-        <input type="text" id="editPaid">
-      </div>
-      <div style="flex:1;" class="form-group">
-        <label>⏳ الباقي:</label>
-        <input type="text" id="editRemaining">
-      </div>
-    </div>
-
-    <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:20px;">
-      <button type="button" onclick="closeEditModal()" class="btn-action btn-secondary-custom" style="padding: 12px; font-size: 15px;">إلغاء</button>
-      <button type="button" onclick="submitBookingUpdate()" class="btn-action btn-success-custom" style="padding: 12px; font-size: 15px;">💾 حفظ التعديلات</button>
+    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:16px;">
+      <button type="button" onclick="closeEditModal()" class="btn-action btn-secondary" style="padding: 10px; height: 44px;">إلغاء</button>
+      <button type="button" onclick="submitBookingUpdate()" class="btn-action btn-success" style="padding: 10px; height: 44px;">💾 حفظ</button>
     </div>
   </div>
 </div>
@@ -232,7 +202,7 @@ async function loadBookingsForSelectedTrip() {
       return;
     }
     
-    let html = '<div style="display: flex; flex-direction: column; gap: 12px;">';
+    let html = '<div style="display: flex; flex-direction: column; gap: 10px;">';
     let foundCount = 0;
     
     for (let i = 1; i < rows.length; i++) {
@@ -246,20 +216,20 @@ async function loadBookingsForSelectedTrip() {
       
       if (rowTrip === tripName.trim()) {
         foundCount++;
-        html += '<div style="background: #ffffff; border: 2.5px solid #c5a059; border-radius: 14px; padding: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.04); display: flex; justify-content: space-between; align-items: center;">';
+        html += '<div class="row-card" style="align-items: center;">';
         html += '<div style="text-align: right; flex: 1;">';
-        html += '<div style="font-size: 16px; font-weight: 900; color: #1e1b4b; margin-bottom: 4px;">👤 ' + memberName + '</div>';
-        html += '<div style="font-size: 13px; font-weight: 900; color: #4b5563; margin-bottom: 2px;">📞 الموبايل: ' + (phoneNum || 'غير متوفر') + '</div>';
-        html += '<div style="font-size: 13px; font-weight: 900; color: #64748b;">1️⃣ الخادم: ' + servantName + ' | المدفوع: ' + paidVal + ' | الباقي: ' + remainVal + '</div>';
+        html += '<div style="font-size: 16px; font-weight: 900; color: var(--primary); margin-bottom: 3px;">👤 ' + memberName + '</div>';
+        html += '<div style="font-size: 13px; font-weight: 800; color: #64748b;">📞 ' + (phoneNum || 'بدون هاتف') + ' | خادم: ' + servantName + '</div>';
+        html += '<div style="font-size: 13px; font-weight: 900; color: #16a34a; margin-top: 2px;">مدفوع: ' + paidVal + ' ج | باقي: ' + remainVal + ' ج</div>';
         html += '</div>';
         html += '<div style="padding-right: 10px;">';
-        html += `<button type="button" onclick="openEditModal(${i + 1}, '${servantName}', '${memberName}', '${phoneNum}', '${paidVal}', '${remainVal}', '${rowTrip}')" style="background: #1e1b4b; color:#c5a059; border: 1.5px solid #c5a059; padding: 10px 16px; border-radius: 10px; cursor:pointer; font-size: 14px; font-weight: 900;">✏️ تعديل</button>`;
+        html += `<button type="button" onclick="openEditModal(${i + 1}, '${servantName}', '${memberName}', '${phoneNum}', '${paidVal}', '${remainVal}', '${rowTrip}')" class="btn-action btn-secondary" style="height: 38px; padding: 0 14px; font-size: 13px; width: auto;">✏️ تعديل</button>`;
         html += '</div></div>';
       }
     }
     
     if (foundCount === 0) {
-      container.innerHTML = '<p style="text-align: center; color: #64748b; font-weight: 900; padding: 20px;">لا توجد حجوزات مطابقة لهذه الرحلة في الشيت.</p>';
+      container.innerHTML = '<p style="text-align: center; color: #64748b; font-weight: 900; padding: 20px;">لا توجد حجوزات مطابقة لهذه الرحلة.</p>';
     } else {
       html += '</div>';
       container.innerHTML = html;
@@ -328,13 +298,13 @@ async function submitTripBooking(e) {
       tripName: window.currentSelectedTrip,
       bookingData: bookingData
     });
-    showTripStatus(res.message || "✅ تم التسجيل!", "#15803d");
+    showTripStatus(res.message || "✅ تم التسجيل!", "#16a34a");
     setTimeout(function() {
       backToTripStep1();
       clearTripStatus();
     }, 1800);
   } catch(err) {
-    showTripStatus("❌ خطأ: " + err.message, "#991b1b");
+    showTripStatus("❌ خطأ: " + err.message, "#dc2626");
   }
 }
 
