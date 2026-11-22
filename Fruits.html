@@ -1,7 +1,126 @@
+<style>
+  .fruit-card {
+    background: #ffffff;
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .fruit-img-wrapper {
+    width: 100%;
+    max-width: 100%;
+    height: 240px;
+    overflow: hidden;
+    background-color: #0f172a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .fruit-img-wrapper img {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block;
+    transition: transform 0.3s ease;
+  }
+
+  .fruit-img-wrapper:active img {
+    transform: scale(1.03);
+  }
+
+  .fruit-img-hint {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    background: rgba(0, 0, 0, 0.65);
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 8px;
+    pointer-events: none;
+  }
+
+  .fruit-content {
+    padding: 16px 18px;
+  }
+
+  .fruit-title {
+    font-size: 17px;
+    font-weight: 900;
+    color: #1e1b4b;
+    margin: 0 0 8px 0;
+    line-height: 1.4;
+  }
+
+  .fruit-desc {
+    font-size: 13.5px;
+    color: #475569;
+    line-height: 1.6;
+    margin: 0;
+    font-weight: 700;
+  }
+
+  /* نافذة تكبير الصورة (Lightbox Modal) */
+  #fruitImageModal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 999999;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    box-sizing: border-box;
+  }
+
+  #fruitImageModal.active {
+    display: flex;
+  }
+
+  #fruitImageModal img {
+    max-width: 100%;
+    max-height: 85vh;
+    border-radius: 12px;
+    object-fit: contain;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+  }
+
+  .modal-close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 42px;
+    height: 42px;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border-radius: 50%;
+    border: none;
+    font-size: 24px;
+    font-weight: 900;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+</style>
+
 <div class="page-card animate-fade">
   <h2 class="page-title">📸 ثمار العام والأنشطة والرحلات</h2>
 
-  <div id="fruitsListContainer" style="display: flex; flex-direction: column; gap: 16px;">
+  <div id="fruitsListContainer" style="display: flex; flex-direction: column; width: 100%; box-sizing: border-box;">
     <div style="text-align: center; padding: 30px; font-weight: 900; color: #64748b;">
       <div class="global-loader"><span></span><span></span><span></span></div>
       جاري تحميل الصور والأنشطة...
@@ -9,7 +128,28 @@
   </div>
 </div>
 
+<!-- نافذة عرض الصورة بكامل الشاشة عند النقر -->
+<div id="fruitImageModal" onclick="closeFruitModal()">
+  <button class="modal-close-btn" onclick="closeFruitModal(event)">✕</button>
+  <img id="fruitModalImg" src="" alt="عرض النشاط">
+</div>
+
 <script>
+function openFruitModal(imgSrc) {
+  if (!imgSrc) return;
+  const modal = document.getElementById('fruitImageModal');
+  const modalImg = document.getElementById('fruitModalImg');
+  modalImg.src = imgSrc;
+  modal.classList.add('active');
+}
+
+function closeFruitModal(e) {
+  if (e) e.stopPropagation();
+  const modal = document.getElementById('fruitImageModal');
+  modal.classList.remove('active');
+  document.getElementById('fruitModalImg').src = '';
+}
+
 async function loadFruitsData() {
   const container = document.getElementById('fruitsListContainer');
 
@@ -31,12 +171,15 @@ async function loadFruitsData() {
       const card = document.createElement('div');
       card.className = 'fruit-card';
       
+      const imgHtml = item.imageUrl ? `
+        <div class="fruit-img-wrapper" onclick="openFruitModal('${item.imageUrl}')">
+          <img src="${item.imageUrl}" alt="${item.title || 'نشاط'}" loading="lazy" onerror="this.parentElement.style.display='none'">
+          <div class="fruit-img-hint">🔍 اضغط للتكبير</div>
+        </div>
+      ` : '';
+
       card.innerHTML = `
-        ${item.imageUrl ? `
-          <div class="fruit-img-wrapper">
-            <img src="${item.imageUrl}" alt="${item.title}" loading="lazy" onerror="this.parentElement.style.display='none'">
-          </div>
-        ` : ''}
+        ${imgHtml}
         <div class="fruit-content">
           <h3 class="fruit-title">📌 ${item.title}</h3>
           ${item.description ? `<p class="fruit-desc">${item.description}</p>` : '<p class="fruit-desc" style="color:#94a3b8;">لا يوجد وصف تفصيلي لهذا النشاط.</p>'}
