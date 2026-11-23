@@ -1,56 +1,202 @@
-<div class="page-card animate-fade">
-  <h2 class="page-title">📷 مسح كود QR لتسجيل الحضور</h2>
+<style>
+  .qr-scanner-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 20px 18px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+    margin-bottom: 20px;
+  }
+
+  /* منطقة عرض الكاميرا الحية */
+  .camera-viewport-wrapper {
+    position: relative;
+    width: 100%;
+    min-height: 290px;
+    background: #0f172a;
+    border-radius: 18px;
+    overflow: hidden;
+    margin-top: 16px;
+    display: none;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    border: 2px solid #312e81;
+  }
+
+  #qrVideoReader {
+    width: 100% !important;
+    border-radius: 16px;
+  }
+
+  #qrVideoReader video {
+    width: 100% !important;
+    height: auto !important;
+    border-radius: 16px;
+    object-fit: cover !important;
+  }
+
+  /* خط المسح المتحرك داخل الكاميرا */
+  .scanner-laser-line {
+    position: absolute;
+    top: 15%;
+    left: 10%;
+    right: 10%;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #22c55e, #a855f7, transparent);
+    box-shadow: 0 0 12px #22c55e;
+    animation: scanLaser 2.2s infinite ease-in-out;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  @keyframes scanLaser {
+    0% { top: 15%; opacity: 0.2; }
+    50% { top: 80%; opacity: 1; }
+    100% { top: 15%; opacity: 0.2; }
+  }
+
+  /* شريط التنبيهات */
+  .scan-alert-box {
+    display: none;
+    padding: 14px 16px;
+    border-radius: 14px;
+    margin-top: 14px;
+    text-align: center;
+    font-weight: 900;
+    font-size: 15px;
+  }
+
+  .alert-success { background: #dcfce7; color: #15803d; border: 1.5px solid #86efac; }
+  .alert-error { background: #fee2e2; color: #b91c1c; border: 1.5px solid #fca5a5; }
+  .alert-info { background: #eff6ff; color: #1d4ed8; border: 1.5px solid #bfdbfe; }
+
+  /* سجل آخر المسجلات في الجلسة */
+  .recent-scans-box {
+    margin-top: 20px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 14px;
+  }
+
+  .recent-scans-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-weight: 900;
+    font-size: 14px;
+    color: #1e1b4b;
+  }
+
+  .scanned-pill {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    font-size: 13.5px;
+    font-weight: 800;
+  }
+</style>
+
+<div class="qr-scanner-card animate-fade">
+  <h2 class="page-title">📹 قراءة كود QR المباشرة بالكاميرا</h2>
 
   <div class="form-group">
     <label for="qrAttendanceSheetSelect">📂 اختر كشف الحضور (الصف):</label>
-    <select id="qrAttendanceSheetSelect"><option value="">-- جاري تحميل الكشوفات --</option></select>
+    <select id="qrAttendanceSheetSelect" onchange="playClickSound()">
+      <option value="">-- جاري تحميل الكشوفات --</option>
+    </select>
   </div>
 
   <div class="form-group">
     <label for="qrMeetingDateSelect">📅 اختر تاريخ الاجتماع:</label>
-    <select id="qrMeetingDateSelect" disabled><option value="">-- اختر الكشف أولاً --</option></select>
+    <select id="qrMeetingDateSelect" disabled onchange="playClickSound()">
+      <option value="">-- اختر الكشف أولاً --</option>
+    </select>
   </div>
 
-  <input id="qrImageInput" type="file" accept="image/*" capture="environment" style="display:none;">
-  <button id="scanButton" class="btn-action btn-warning" type="button" disabled style="margin-top: 10px;">
-    📷 فتح الكاميرا وقراءة QR
-  </button>
-  
-  <p style="font-size: 13px; line-height: 1.7; color: #64748b; margin-top: 14px; text-align: center;">
-    اضغط الزر لفتح كاميرا الهاتف وتصوير كارت المخدوم. ستتم قراءة الكود فوراً وتسجيل حضوره في الشيت.
-  </p>
-  
-  <img id="scanPreview" alt="صورة كارت الحضور" style="width: 100%; max-height: 260px; object-fit: contain; margin-top: 15px; display: none; border-radius: 14px; border: 1px solid #cbd5e1;">
-  <div id="resultAlert" style="display:none; padding:14px; border-radius:14px; margin-top:16px; text-align:center; font-weight:900; font-size:15px;"></div>
+  <!-- زر تشغيل وإيقاف الكاميرا -->
+  <div style="display: flex; gap: 10px; margin-top: 10px;">
+    <button id="btnToggleCamera" class="btn-action btn-primary" type="button" disabled onclick="toggleCameraScanner()">
+      📷 تشغيل الكاميرا للقراءة الفورية
+    </button>
+  </div>
+
+  <!-- شاشة الكاميرا المباشرة -->
+  <div id="cameraViewportWrapper" class="camera-viewport-wrapper">
+    <div class="scanner-laser-line" id="scannerLaser"></div>
+    <div id="qrVideoReader"></div>
+  </div>
+
+  <!-- تنبيه حالة القراءة والتسجيل -->
+  <div id="scanStatusAlert" class="scan-alert-box"></div>
+
+  <!-- خيار بديل: رفع صورة من الاستوديو إذا لزم الأمر -->
+  <div style="margin-top: 18px; text-align: center; border-top: 1px dashed #e2e8f0; padding-top: 14px;">
+    <button type="button" style="background: none; border: none; color: #64748b; font-size: 13px; font-weight: 800; text-decoration: underline; cursor: pointer;" onclick="document.getElementById('qrFileFallback').click()">
+      🖼️ أو اختر صورة كود QR من ألبوم الهاتف
+    </button>
+    <input type="file" id="qrFileFallback" accept="image/*" style="display: none;" onchange="handleFileFallback(event)">
+  </div>
+
+  <!-- سجل المسجلين في هذه اللحظة -->
+  <div id="recentScansSection" class="recent-scans-box" style="display: none;">
+    <div class="recent-scans-header">
+      <span>📋 آخر المخدومين الذين تم تسجيلهم الآن:</span>
+      <span id="scanCountBadge" style="background: #16a34a; color: white; border-radius: 20px; padding: 2px 10px; font-size: 12px;">0</span>
+    </div>
+    <div id="scannedListItems"></div>
+  </div>
 </div>
 
-<div id="qr-file-reader" style="display:none;"></div>
+<div id="qr-hidden-file-reader" style="display:none;"></div>
 
 <script>
 let selectedSheetName = '';
 let selectedColIndex = '';
-let qrReader = null;
-let processing = false;
+let html5QrScanner = null;
+let isCameraActive = false;
+let isProcessingAttendance = false;
+let lastScannedCode = '';
+let lastScanTimestamp = 0;
+let totalScannedInSession = 0;
 
 const sheetSelect = document.getElementById('qrAttendanceSheetSelect');
 const dateSelect = document.getElementById('qrMeetingDateSelect');
-const scanButton = document.getElementById('scanButton');
-const imageInput = document.getElementById('qrImageInput');
-const preview = document.getElementById('scanPreview');
+const btnToggle = document.getElementById('btnToggleCamera');
+const viewportWrapper = document.getElementById('cameraViewportWrapper');
+const alertBox = document.getElementById('scanStatusAlert');
 
-function alertUser(message, type) {
-  const box = document.getElementById('resultAlert');
-  box.textContent = message;
-  box.style.display = 'block';
-  if (type === 'success') {
-    box.style.background = '#dcfce7'; box.style.color = '#15803d'; box.style.border = '1.5px solid #86efac';
-  } else if (type === 'error') {
-    box.style.background = '#fee2e2'; box.style.color = '#b91c1c'; box.style.border = '1.5px solid #fca5a5';
-  } else {
-    box.style.background = '#eff6ff'; box.style.color = '#1d4ed8'; box.style.border = '1.5px solid #bfdbfe';
-  }
+// صوت Beep مميز عند نجاح القراءة الفورية
+function playScanBeep() {
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    gain.gain.setValueAtTime(0.25, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.18);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.18);
+  } catch (e) {}
 }
 
+function showStatus(message, type) {
+  alertBox.innerHTML = message;
+  alertBox.className = 'scan-alert-box alert-' + type;
+  alertBox.style.display = 'block';
+}
+
+// 1. تحميل كشوفات الصفوف
 async function loadAttendanceSheetsList() {
   sheetSelect.disabled = true;
   try {
@@ -66,21 +212,27 @@ async function loadAttendanceSheetsList() {
     }
   } catch (err) {
     sheetSelect.disabled = false;
-    alertUser('تعذر تحميل الكشوفات: ' + err.message, 'error');
+    showStatus('تعذر تحميل الكشوفات: ' + err.message, 'error');
   }
 }
 
+// 2. عند تغيير كشف الصف
 sheetSelect.addEventListener('change', async function() {
   selectedSheetName = sheetSelect.value;
   selectedColIndex = '';
   dateSelect.disabled = true;
-  scanButton.disabled = true;
+  btnToggle.disabled = true;
   dateSelect.innerHTML = '<option value="">-- جاري تحميل التواريخ --</option>';
-  preview.style.display = 'none';
+  
+  if (isCameraActive) {
+    await stopCameraScanner();
+  }
+
   if (!selectedSheetName) {
     dateSelect.innerHTML = '<option value="">-- اختر الكشف أولاً --</option>';
     return;
   }
+
   try {
     const res = await apiGet('getAttendanceData', { sheetName: selectedSheetName });
     dateSelect.innerHTML = '<option value="">-- اختر تاريخ الاجتماع --</option>';
@@ -93,81 +245,188 @@ sheetSelect.addEventListener('change', async function() {
       dateSelect.innerHTML = '<option value="">لا توجد تواريخ مسجلة</option>';
     }
   } catch (err) {
-    alertUser('فشل تحميل التواريخ: ' + err.message, 'error');
+    showStatus('فشل تحميل التواريخ: ' + err.message, 'error');
   }
 });
 
+// 3. عند اختيار التاريخ
 dateSelect.addEventListener('change', function() {
   selectedColIndex = dateSelect.value;
-  scanButton.disabled = !(selectedSheetName && selectedColIndex);
+  const ready = !!(selectedSheetName && selectedColIndex);
+  btnToggle.disabled = !ready;
+  if (!ready && isCameraActive) {
+    stopCameraScanner();
+  }
 });
 
-scanButton.addEventListener('click', function() {
+// 4. تشغيل / إيقاف الكاميرا الحية
+async function toggleCameraScanner() {
+  if (isCameraActive) {
+    await stopCameraScanner();
+  } else {
+    await startCameraScanner();
+  }
+}
+
+async function startCameraScanner() {
   if (!selectedSheetName || !selectedColIndex) {
-    alertUser('اختر كشف الحضور وتاريخ الاجتماع أولاً.', 'error');
+    showStatus('⚠️ يرجى اختيار كشف الحضور وتاريخ الاجتماع أولاً', 'error');
     return;
   }
-  imageInput.click();
-});
 
-imageInput.addEventListener('change', async function(event) {
-  const file = event.target.files && event.target.files[0];
-  if (!file) return;
-  if (!/^image\//i.test(file.type)) {
-    alertUser('الملف المختار ليس صورة. التقط صورة للكارت أو اختر صورة بصيغة JPG أو PNG.', 'error');
-    imageInput.value = '';
-    return;
-  }
   if (typeof Html5Qrcode === 'undefined') {
-    alertUser('تعذر تحميل مكتبة قراءة QR. تحقق من اتصال الإنترنت.', 'error');
-    imageInput.value = '';
+    showStatus('❌ مكتبة الكاميرا لم تكتمل بعد، تأكد من الإنترنت.', 'error');
     return;
   }
-  if (processing) return;
-  processing = true;
-  scanButton.disabled = true;
-  alertUser('⏳ جارٍ تحليل الصورة والبحث عن كود QR...', 'info');
 
-  preview.src = URL.createObjectURL(file);
-  preview.style.display = 'block';
+  viewportWrapper.style.display = 'block';
+  showStatus('⏳ جارٍ فتح الكاميرا المباشرة...', 'info');
+  btnToggle.disabled = true;
 
   try {
-    if (!qrReader) qrReader = new Html5Qrcode('qr-file-reader', { verbose: false });
-    const decodedText = await qrReader.scanFile(file, false);
-    const studentId = String(decodedText || '').trim();
-    if (!studentId) throw new Error('لم يتم العثور على نص داخل كود QR.');
-    alertUser('تمت قراءة الكود (' + studentId + '). جارٍ تسجيل الحضور...', 'info');
-    await registerStudent(studentId);
-  } catch (err) {
-    alertUser('لم نتمكن من قراءة الكود من الصورة بوضوح. حاول التصوير بإضاءة جيدة.', 'error');
-    processing = false;
-    scanButton.disabled = !(selectedSheetName && selectedColIndex);
-  } finally {
-    imageInput.value = '';
-  }
-});
+    if (!html5QrScanner) {
+      html5QrScanner = new Html5Qrcode("qrVideoReader");
+    }
 
-async function registerStudent(studentId) {
+    const config = {
+      fps: 12,
+      qrbox: function(viewWidth, viewHeight) {
+        const edge = Math.floor(Math.min(viewWidth, viewHeight) * 0.75);
+        return { width: edge, height: edge };
+      },
+      aspectRatio: 1.0
+    };
+
+    await html5QrScanner.start(
+      { facingMode: "environment" },
+      config,
+      onScanSuccessCallback,
+      onScanErrorCallback
+    );
+
+    isCameraActive = true;
+    btnToggle.innerHTML = '⏹️ إيقاف الكاميرا';
+    btnToggle.className = 'btn-action btn-secondary';
+    btnToggle.disabled = false;
+    showStatus('🟢 الكاميرا تعمل الآن! وجّه الكود نحو المربع للمسح المباشر', 'info');
+
+  } catch (err) {
+    console.error("Camera init error:", err);
+    viewportWrapper.style.display = 'none';
+    btnToggle.disabled = false;
+    btnToggle.innerHTML = '📷 تشغيل الكاميرا للقراءة الفورية';
+    btnToggle.className = 'btn-action btn-primary';
+    showStatus('⚠️ تعذر تشغيل الكاميرا: تأكد من إعطاء إذن الكاميرا للمتصفح.', 'error');
+  }
+}
+
+async function stopCameraScanner() {
+  if (html5QrScanner && isCameraActive) {
+    try {
+      await html5QrScanner.stop();
+    } catch(e) {}
+  }
+  isCameraActive = false;
+  viewportWrapper.style.display = 'none';
+  btnToggle.innerHTML = '📷 تشغيل الكاميرا للقراءة الفورية';
+  btnToggle.className = 'btn-action btn-primary';
+}
+
+function onScanErrorCallback(err) {}
+
+// عند التقاط كود QR بنجاح في الكاميرا الحية
+async function onScanSuccessCallback(decodedText) {
+  const code = String(decodedText || '').trim();
+  if (!code) return;
+
+  const now = Date.now();
+  // منع قراءة نفس الكود مرتين متتاليتين خلال 3 ثوانٍ
+  if (code === lastScannedCode && (now - lastScanTimestamp) < 3000) {
+    return;
+  }
+
+  if (isProcessingAttendance) return;
+  isProcessingAttendance = true;
+  lastScannedCode = code;
+  lastScanTimestamp = now;
+
+  // صوت النغمة الفورية
+  playScanBeep();
+
+  showStatus('⏳ تمت قراءة الكود (' + code + ')! جارٍ التسجيل في الشيت...', 'info');
+
   try {
     const response = await apiPost('registerAttendanceByQRWithDate', {
       sheetName: selectedSheetName,
       colIndex: Number(selectedColIndex),
-      studentId: studentId
+      studentId: code
     });
 
     if (response && response.success) {
-      alertUser('✅ ' + (response.message || 'تم تسجيل الحضور بنجاح.'), 'success');
-      playClickSound();
+      showStatus('✅ ' + (response.message || 'تم تسجيل الحضور بنجاح'), 'success');
+      recordScanInHistory(code, response.message || 'تم التسجيل', true);
     } else {
-      alertUser('❌ ' + (response && response.message ? response.message : 'لم يتم تسجيل الحضور.'), 'error');
+      showStatus('⚠️ ' + (response && response.message ? response.message : 'تعذر تسجيل الحضور'), 'error');
+      recordScanInHistory(code, response && response.message ? response.message : 'خطأ', false);
     }
   } catch (err) {
-    alertUser('حدث خطأ أثناء تسجيل الحضور: ' + err.message, 'error');
+    showStatus('❌ حدث خطأ في الاتصال: ' + err.message, 'error');
   } finally {
-    processing = false;
-    scanButton.disabled = !(selectedSheetName && selectedColIndex);
+    isProcessingAttendance = false;
   }
 }
 
+// إضافة الطالب لسجل المسجلين المباشر
+function recordScanInHistory(code, message, isSuccess) {
+  totalScannedInSession++;
+  document.getElementById('recentScansSection').style.display = 'block';
+  document.getElementById('scanCountBadge').textContent = totalScannedInSession;
+
+  const listContainer = document.getElementById('scannedListItems');
+  const pill = document.createElement('div');
+  pill.className = 'scanned-pill';
+  pill.style.borderLeft = isSuccess ? '4px solid #16a34a' : '4px solid #dc2626';
+
+  const timeStr = new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  pill.innerHTML = `
+    <div>
+      <span style="color: ${isSuccess ? '#15803d' : '#b91c1c'}; font-size: 15px;">${isSuccess ? '✅' : '❌'}</span>
+      <span style="color: #1e1b4b; margin-right: 6px;">${message}</span>
+      <span style="color: #64748b; font-size: 11px;">(كود: ${code})</span>
+    </div>
+    <span style="font-size: 11px; color: #94a3b8; font-family: monospace;">${timeStr}</span>
+  `;
+
+  listContainer.insertBefore(pill, listContainer.firstChild);
+}
+
+// خيار بديل في حال أراد اختيار صورة من المعرض
+async function handleFileFallback(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  if (!selectedSheetName || !selectedColIndex) {
+    showStatus('⚠️ اختر كشف الصف وتاريخ الاجتماع أولاً', 'error');
+    event.target.value = '';
+    return;
+  }
+
+  showStatus('⏳ جارٍ تحليل الصورة من الألبوم...', 'info');
+  try {
+    const fileReader = new Html5Qrcode("qr-hidden-file-reader");
+    const decoded = await fileReader.scanFile(file, false);
+    await onScanSuccessCallback(decoded);
+  } catch (err) {
+    showStatus('❌ تعذر العثور على كود QR واضح في الصورة المختارة', 'error');
+  } finally {
+    event.target.value = '';
+  }
+}
+
+// تنظيف الكاميرا عند الخروج من الصفحة
+window.stopActiveScanner = stopCameraScanner;
+window.addEventListener('beforeunload', stopCameraScanner);
+
+// بدء التحميل
 loadAttendanceSheetsList();
 </script>
